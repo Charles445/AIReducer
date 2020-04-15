@@ -187,6 +187,8 @@ public class SpawnHandler
 	{
 		switch(path)
 		{
+			case "deathworm":
+				handleDeathWorm(entity);break;
 			case "myrmex_worker":
 			case "myrmex_soldier":
 			case "myrmex_sentinel":
@@ -198,13 +200,24 @@ public class SpawnHandler
 		}
 	}
 	
+	private void handleDeathWorm(EntityLiving entity)
+	{
+		if(!ModConfig.iceandfire.deathworm)
+			return;
+		
+		AIReducer.debugDebug("Applying deathworm delay: "+ModConfig.iceandfire.deathworm_ai_delay);
+		applyTickRate(entity.tasks, ModConfig.iceandfire.deathworm_ai_delay);
+		applyTickRate(entity.targetTasks, ModConfig.iceandfire.deathworm_ai_delay);
+	}
+	
 	private void handleMyrmex(EntityLiving entity)
 	{
 		if(!ModConfig.iceandfire.myrmex)
 			return;
 		
 		AIReducer.debugDebug("Applying myrmex delay: "+ModConfig.iceandfire.myrmex_ai_delay);
-		applyTickRate(entity, ModConfig.iceandfire.myrmex_ai_delay);
+		applyTickRate(entity.tasks, ModConfig.iceandfire.myrmex_ai_delay);
+		applyTickRate(entity.targetTasks, ModConfig.iceandfire.myrmex_ai_delay);
 		
 		
 		wrapTask(entity, c_iceandfire_MyrmexAIEscortEntity, WrappedTaskMyrmexAIEscortEntity.class);
@@ -270,7 +283,7 @@ public class SpawnHandler
 			
 		EntityRabbit entityRabbit = (EntityRabbit)entity;
 		
-		applyTickRate(entityRabbit, ModConfig.vanilla.rabbit_ai_delay);
+		applyTickRate(entityRabbit.tasks, ModConfig.vanilla.rabbit_ai_delay);
 		
 		if(removeAllTasksOfClass(entityRabbit, c_rabbit_AIAvoidEntity))
 		{
@@ -379,11 +392,11 @@ public class SpawnHandler
 		return null;
 	}
 	
-	private void applyTickRate(EntityLiving entity, int tickRate)
+	private void applyTickRate(EntityAITasks tasks, int tickRate)
 	{
 		try
 		{
-			f_tickRate.setInt(entity.tasks, tickRate);
+			f_tickRate.setInt(tasks, tickRate);
 		}
 		catch (Exception e)
 		{
