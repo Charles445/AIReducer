@@ -1,21 +1,24 @@
 package com.charles445.aireducer.ai;
 
+import javax.annotation.Nullable;
+
+import com.charles445.aireducer.config.ModConfig;
+
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.ai.EntityAITasks;
 
 public abstract class WrappedTask extends EntityAIBase
 {
 	public EntityAIBase task;
-	public EntityLivingBase entity;
+	public EntityLiving entity;
 	
 	public WrappedTask(EntityLiving entity, EntityAIBase task)
 	{
 		this.task=task;
 		this.entity=entity;
 	}
-	
-	abstract public double getUpdateChance();
 	
 	@Override
 	public boolean shouldExecute()
@@ -50,13 +53,13 @@ public abstract class WrappedTask extends EntityAIBase
     @Override
     public void updateTask()
     {
-    	if(entity.getRNG().nextDouble() < this.getUpdateChance())
-    		task.updateTask();
+    	task.updateTask();
     }
 
     @Override
     public void setMutexBits(int mutexBitsIn)
     {
+    	this.setMutexBits(mutexBitsIn); //Just in case
         task.setMutexBits(mutexBitsIn);
     }
 

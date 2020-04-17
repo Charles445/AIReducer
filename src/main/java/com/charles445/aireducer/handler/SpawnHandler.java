@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -12,14 +13,19 @@ import javax.annotation.Nullable;
 import com.charles445.aireducer.AIReducer;
 import com.charles445.aireducer.ai.AIAvoidReducedRabbit;
 import com.charles445.aireducer.ai.WrappedTask;
+import com.charles445.aireducer.ai.myrmex.PathNavigateMyrmexAlternate;
+import com.charles445.aireducer.ai.myrmex.ReflectMyrmex;
 import com.charles445.aireducer.ai.myrmex.WrappedTaskMyrmexAIEscortEntity;
 import com.charles445.aireducer.ai.myrmex.WrappedTaskMyrmexAIFindHidingSpot;
 import com.charles445.aireducer.ai.myrmex.WrappedTaskMyrmexAIForage;
+import com.charles445.aireducer.ai.myrmex.WrappedTaskMyrmexAILeaveHive;
 import com.charles445.aireducer.ai.myrmex.WrappedTaskMyrmexAIReEnterHive;
 import com.charles445.aireducer.compat.iceandfire.VillagerAIFearUntamedReduced;
 import com.charles445.aireducer.config.ModConfig;
 import com.charles445.aireducer.util.ModNames;
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.base.Supplier;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
@@ -33,6 +39,7 @@ import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityRabbit;
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.Loader;
@@ -46,6 +53,7 @@ public class SpawnHandler
 	public boolean loaded_minecraft;
 	public boolean can_apply_tickrate;
 	
+	public Field f_EntityLiving_navigator;
 	public Field f_tickRate;
 	
 	public Class c_rabbit_AIAvoidEntity;
@@ -60,6 +68,7 @@ public class SpawnHandler
 	
 	public Class c_iceandfire_MyrmexAIForage;
 	public Class c_iceandfire_MyrmexAIFindHidingSpot;
+	public Class c_iceandfire_MyrmexAILeaveHive;
 	public Class c_iceandfire_MyrmexAIReEnterHive;
 	public Class c_iceandfire_MyrmexAIEscortEntity;
 	
@@ -83,6 +92,17 @@ public class SpawnHandler
 			}
 			
 			f_tickRate.setAccessible(true);
+			
+			try
+			{
+				f_EntityLiving_navigator = EntityLiving.class.getDeclaredField("field_70699_by");
+			}
+			catch(Exception e) //Attempt deobfuscated
+			{
+				f_EntityLiving_navigator = EntityLiving.class.getDeclaredField("navigator");
+			}
+			
+			f_EntityLiving_navigator.setAccessible(true);
 		}
 		catch(Exception e)
 		{
@@ -116,8 +136,11 @@ public class SpawnHandler
 				
 				c_iceandfire_MyrmexAIForage = Class.forName("com.github.alexthe666.iceandfire.entity.ai.MyrmexAIForage");
 				c_iceandfire_MyrmexAIFindHidingSpot = Class.forName("com.github.alexthe666.iceandfire.entity.ai.MyrmexAIFindHidingSpot");
+				c_iceandfire_MyrmexAILeaveHive = Class.forName("com.github.alexthe666.iceandfire.entity.ai.MyrmexAILeaveHive");
 				c_iceandfire_MyrmexAIReEnterHive = Class.forName("com.github.alexthe666.iceandfire.entity.ai.MyrmexAIReEnterHive");
 				c_iceandfire_MyrmexAIEscortEntity = Class.forName("com.github.alexthe666.iceandfire.entity.ai.MyrmexAIEscortEntity");
+				
+				new ReflectMyrmex();
 			}
 			catch(Exception e)
 			{
@@ -194,7 +217,7 @@ public class SpawnHandler
 			case "myrmex_sentinel":
 			case "myrmex_royal":
 			case "myrmex_queen":
-				handleMyrmex(entity);break;
+				handleMyrmex(entity, path);break;
 			
 			default: break;
 		}
@@ -210,20 +233,28 @@ public class SpawnHandler
 		applyTickRate(entity.targetTasks, ModConfig.iceandfire.deathworm_ai_delay);
 	}
 	
-	private void handleMyrmex(EntityLiving entity)
+	private void handleMyrmex(EntityLiving entity, String path)
 	{
 		if(!ModConfig.iceandfire.myrmex)
 			return;
+		
+		if(ModConfig.iceandfire.myrmexAlternateNavigation && !path.equals("myrmex_royal"))
+		{
+			AIReducer.debugDebug("Swapping out myrmex navigator");
+			setNavigator(entity, new PathNavigateMyrmexAlternate(entity, entity.getEntityWorld()));
+		}
 		
 		AIReducer.debugDebug("Applying myrmex delay: "+ModConfig.iceandfire.myrmex_ai_delay);
 		applyTickRate(entity.tasks, ModConfig.iceandfire.myrmex_ai_delay);
 		applyTickRate(entity.targetTasks, ModConfig.iceandfire.myrmex_ai_delay);
 		
-		
-		wrapTask(entity, c_iceandfire_MyrmexAIEscortEntity, WrappedTaskMyrmexAIEscortEntity.class);
-		wrapTask(entity, c_iceandfire_MyrmexAIForage, WrappedTaskMyrmexAIForage.class);
-		wrapTask(entity, c_iceandfire_MyrmexAIFindHidingSpot, WrappedTaskMyrmexAIFindHidingSpot.class);
-		wrapTask(entity, c_iceandfire_MyrmexAIReEnterHive, WrappedTaskMyrmexAIReEnterHive.class);
+		AIReducer.debugDebug("Current Tasks Count: "+entity.tasks.taskEntries.size());
+		wrapTask(entity, entity.tasks, c_iceandfire_MyrmexAIEscortEntity, WrappedTaskMyrmexAIEscortEntity.class);
+		wrapTask(entity, entity.tasks, c_iceandfire_MyrmexAIForage, WrappedTaskMyrmexAIForage.class);
+		wrapTask(entity, entity.tasks, c_iceandfire_MyrmexAIFindHidingSpot, WrappedTaskMyrmexAIFindHidingSpot.class);
+		wrapTask(entity, entity.tasks, c_iceandfire_MyrmexAILeaveHive, WrappedTaskMyrmexAILeaveHive.class);
+		wrapTask(entity, entity.tasks, c_iceandfire_MyrmexAIReEnterHive, WrappedTaskMyrmexAIReEnterHive.class);
+		AIReducer.debugDebug("Final Tasks Count: "+entity.tasks.taskEntries.size());
 	}
 	/*
 	private void wrapTaskMyrmex(EntityLiving entity, Class clazz)
@@ -237,8 +268,89 @@ public class SpawnHandler
 	}
 	*/
 	
-	private void wrapTask(EntityLiving entity, Class clazz, Class<? extends WrappedTask> wrapperClazz)
+	private boolean removeAllTasksOfClass(EntityLiving entity, Class classToRemove)
 	{
+		//TODO replace completely
+		
+		boolean found = false;
+		Iterator<EntityAITaskEntry> iterator = entity.tasks.taskEntries.iterator();
+		while(iterator.hasNext())
+		{
+			EntityAITaskEntry task = iterator.next();
+			
+			if(task.action.getClass()==classToRemove)
+			{
+				AIReducer.debugDebug("Removing "+classToRemove.getName()+" from "+entity.getClass().getName());
+				found = true;
+				iterator.remove();
+			}
+		}
+		return found;
+	}
+	
+	private void tryAndReplaceAllTasks(EntityLiving entity, EntityAITasks tasks, Class toMatch, Function<EntityAITaskEntry,EntityAIBase> action)
+	{
+		int count = 0;
+		LinkedList<EntityAITaskEntry> entries = new LinkedList<>();
+		for(EntityAITaskEntry entry : tasks.taskEntries)
+		{
+			if(toMatch.isInstance(entry.action))
+			{
+				entries.add(tasks.new EntityAITaskEntry(entry.priority, action.apply(entry)));
+				count++;
+			}
+			else
+			{
+				entries.add(entry);
+			}
+		}
+		if(count>0)
+		{
+			AIReducer.debugDebug("Replacing "+count+" tasks of "+toMatch.getName());
+			tasks.taskEntries.clear();
+			tasks.taskEntries.addAll(entries);
+		}
+		//Don't do anything if there were no matches
+		
+		/*
+		//DEBUG
+
+		for(EntityAITaskEntry entry : tasks.taskEntries)
+		{
+			AIReducer.debugDebug("["+entry.priority+", "+entry.action.getClass().getName()+"]");
+		}
+		
+		*/
+	}
+	
+	private void wrapTask(EntityLiving entity, EntityAITasks tasks, Class clazz, Class<? extends WrappedTask> wrapperClazz)
+	{
+		tryAndReplaceAllTasks(entity, tasks, clazz, (Function<EntityAITaskEntry,EntityAIBase>) oldTaskEntry -> 
+		{
+			try
+			{
+				Constructor construct = wrappedConstructorMap.get(wrapperClazz);
+				if(construct==null)
+				{
+					AIReducer.logger.info("Caching Wrapped Task Constructor: "+wrapperClazz.getName());
+					construct = wrapperClazz.getDeclaredConstructor(EntityLiving.class, EntityAIBase.class);
+					wrappedConstructorMap.put(wrapperClazz, construct);
+				}
+				
+				WrappedTask wrapper = (WrappedTask) construct.newInstance(entity, oldTaskEntry.action);
+				
+				//entity.tasks.addTask(oldTaskEntry.priority, wrapper);
+				AIReducer.debugDebug("Wrapped task with priority "+oldTaskEntry.priority+": "+oldTaskEntry.action.getClass().getName()+" "+wrapper.getClass().getName());
+				return wrapper;
+			}
+			catch(Exception e)
+			{
+				AIReducer.logger.error("Failed to reflect to requested WrappedTask constructor!", e);
+				return oldTaskEntry.action;
+			}
+		});
+		
+		/*
 		EntityAITaskEntry oldTaskEntry = getAndRemoveTaskOfClass(entity,clazz);
 		if(oldTaskEntry!=null)
 		{
@@ -251,14 +363,19 @@ public class SpawnHandler
 					construct = wrapperClazz.getDeclaredConstructor(EntityLiving.class, EntityAIBase.class);
 					wrappedConstructorMap.put(wrapperClazz, construct);
 				}
-				entity.tasks.addTask(oldTaskEntry.priority, (WrappedTask)construct.newInstance(entity, oldTaskEntry.action));
-				AIReducer.debugDebug("Wrapped task with priority "+oldTaskEntry.priority+": "+oldTaskEntry.action.getClass().getName());
+				
+				WrappedTask wrapper = (WrappedTask) construct.newInstance(entity, oldTaskEntry.action);
+				
+				entity.tasks.addTask(oldTaskEntry.priority, wrapper);
+				
+				AIReducer.debugDebug("Wrapped task with priority "+oldTaskEntry.priority+": "+oldTaskEntry.action.getClass().getName()+" "+wrapper.getClass().getName());
 			}
 			catch(Exception e)
 			{
 				AIReducer.logger.error("Failed to reflect to requested WrappedTask constructor!", e);
 			}
 		}
+		*/
 	}
 
 	private void handleVanilla(EntityLiving entity, String path)
@@ -285,6 +402,8 @@ public class SpawnHandler
 		
 		applyTickRate(entityRabbit.tasks, ModConfig.vanilla.rabbit_ai_delay);
 		
+		
+		//TODO probably broken, should fix later
 		if(removeAllTasksOfClass(entityRabbit, c_rabbit_AIAvoidEntity))
 		{
 			//Couldn't tell how much performance consolidating these saved, I do have the code lying around to do it though, inaccurately however
@@ -292,6 +411,7 @@ public class SpawnHandler
 			entityRabbit.tasks.addTask(4, new AIAvoidReducedRabbit(entityRabbit, EntityWolf.class, 10.0F, 2.2D, 2.2D));
 			entityRabbit.tasks.addTask(4, new AIAvoidReducedRabbit(entityRabbit, EntityMob.class, 4.0F, 2.2D, 2.2D));
 		}
+		
 	}
 	
 	private void tryReplaceIceAndFireVillagerFearTask(EntityLiving entity)
@@ -299,16 +419,13 @@ public class SpawnHandler
 		//Just in case
 		if(entity instanceof EntityCreature)
 		{
-			if(removeAllTasksOfClass(entity, c_iceandfire_VillagerAIFearUntamed))
-			{
-				makeIceAndFireVillagerFearTask((EntityCreature)entity);
-			}
+			tryAndReplaceAllTasks(entity, entity.tasks, c_iceandfire_VillagerAIFearUntamed, task -> makeIceAndFireVillagerFearTask((EntityCreature)entity));
 		}
 	}
 	
-	private void makeIceAndFireVillagerFearTask(EntityCreature entity)
+	private EntityAIBase makeIceAndFireVillagerFearTask(EntityCreature entity)
 	{
-		entity.tasks.addTask(1, new VillagerAIFearUntamedReduced(
+		return new VillagerAIFearUntamedReduced(
 			entity,
 			EntityLivingBase.class, //Class to avoid
 			new Predicate<EntityLivingBase>()
@@ -317,7 +434,7 @@ public class SpawnHandler
 	            {
 	            	return targentity != null && c_iceandfire_IVillagerFear.isInstance(targentity);         	
 	            }
-			},12.0f, 0.8, 0.8));
+			},12.0f, 0.8, 0.8);
 	}
 	
 	private void tryReplaceIceAndFireLivestockFearTask(EntityLiving entity)
@@ -325,16 +442,15 @@ public class SpawnHandler
 		//Just in case
 		if(entity instanceof EntityCreature)
 		{
-			if(removeAllTasksOfClass(entity, c_iceandfire_VillagerAIFearUntamed))
-			{
-				makeIceAndFireLivestockFearTask((EntityCreature)entity);
-			}
+			tryAndReplaceAllTasks(entity, entity.tasks, c_iceandfire_VillagerAIFearUntamed, task -> makeIceAndFireLivestockFearTask((EntityCreature)entity));
 		}
 	}
 	
-	private void makeIceAndFireLivestockFearTask(EntityCreature entity)
+	
+	
+	private EntityAIBase makeIceAndFireLivestockFearTask(EntityCreature entity)
 	{
-		entity.tasks.addTask(1, new VillagerAIFearUntamedReduced(
+		return new VillagerAIFearUntamedReduced(
 			entity, 
 			EntityLivingBase.class, //Class to avoid
 			//c_iceandfire_IAnimalFear, //Class to avoid ClassInheritanceMultiMap MOMENTS COME ON
@@ -352,9 +468,10 @@ public class SpawnHandler
 	        			return false;
 	        		}           	
 	            }
-			},12.0f,1.2,1.5));
+			},12.0f,1.2,1.5);
 	}
 	
+	/*
 	private boolean removeAllTasksOfClass(EntityLiving entity, Class classToRemove)
 	{
 		boolean found = false;
@@ -372,24 +489,46 @@ public class SpawnHandler
 		}
 		return found;
 	}
-	
+	*/
+	/*
 	@Nullable
 	private EntityAITaskEntry getAndRemoveTaskOfClass(EntityLiving entity, Class classToRemove)
 	{
 		Iterator<EntityAITaskEntry> iterator = entity.tasks.taskEntries.iterator();
+		
+		EntityAITaskEntry taskToRemove = null;
+		
 		while(iterator.hasNext())
 		{
 			EntityAITaskEntry task = iterator.next();
 			
 			if(task.action.getClass()==classToRemove)
 			{
-				AIReducer.debugDebug("Removing "+classToRemove.getName()+" from "+entity.getClass().getName());
-				iterator.remove();
-				return task;
+				taskToRemove = task;
+				break;
 			}
 		}
 		
+		if(taskToRemove!=null)
+		{
+			AIReducer.debugDebug("Removing "+classToRemove.getName()+" from "+entity.getClass().getName());
+			entity.tasks.removeTask(taskToRemove.action);
+			return taskToRemove;
+		}
+		
 		return null;
+	}
+	*/
+	private void setNavigator(EntityLiving entity, PathNavigate navigator)
+	{
+		try
+		{
+			f_EntityLiving_navigator.set(entity, navigator);
+		}
+		catch(Exception e)
+		{
+			//TODO
+		}
 	}
 	
 	private void applyTickRate(EntityAITasks tasks, int tickRate)

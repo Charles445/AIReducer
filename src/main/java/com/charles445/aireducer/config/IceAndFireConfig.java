@@ -37,6 +37,14 @@ public class IceAndFireConfig
 	@Config.RangeDouble(min=0.01d, max=1.0d)
 	public double myrmexUpdateChanceForage = 0.1d;
 	
+	@Config.Comment("Use alternate path navigation - for 1.7.1")
+	@Config.Name("MyrmexAlternateNavigation")
+	public boolean myrmexAlternateNavigation = true;
+	
+	@Config.Comment("Modify LeaveHive - for 1.7.1")
+	@Config.Name("MyrmexModify LeaveHive")
+	public boolean myrmexModifyLeaveHive = true;
+	
 	@Config.Comment("Update chance for ReEnterHive - Vanilla is 1.0")
 	@Config.Name("MyrmexUpdateChance ReEnterHive")
 	@Config.RangeDouble(min=0.01d, max=1.0d)

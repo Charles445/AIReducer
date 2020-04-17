@@ -6,17 +6,22 @@ import com.charles445.aireducer.config.ModConfig;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
 
-public class WrappedTaskMyrmexAIForage extends WrappedTask
+public class WrappedTaskMyrmexAIForage extends WrappedTaskMyrmex
 {
 	public WrappedTaskMyrmexAIForage(EntityLiving entity, EntityAIBase task)
 	{
 		super(entity, task);
 	}
-
-	@Override
+	
 	public double getUpdateChance()
 	{
 		return ModConfig.iceandfire.myrmexUpdateChanceForage;
 	}
 	
+	@Override
+    public void updateTask()
+    {
+    	if(entity.getRNG().nextDouble() < this.getUpdateChance())
+    		task.updateTask();
+    }
 }
