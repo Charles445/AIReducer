@@ -19,6 +19,7 @@ import com.charles445.aireducer.ai.myrmex.WrappedTaskMyrmexAIEscortEntity;
 import com.charles445.aireducer.ai.myrmex.WrappedTaskMyrmexAIFindHidingSpot;
 import com.charles445.aireducer.ai.myrmex.WrappedTaskMyrmexAIForage;
 import com.charles445.aireducer.ai.myrmex.WrappedTaskMyrmexAILeaveHive;
+import com.charles445.aireducer.ai.myrmex.WrappedTaskMyrmexAIMoveThroughHive;
 import com.charles445.aireducer.ai.myrmex.WrappedTaskMyrmexAIReEnterHive;
 import com.charles445.aireducer.compat.iceandfire.VillagerAIFearUntamedReduced;
 import com.charles445.aireducer.config.ModConfig;
@@ -32,6 +33,7 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
@@ -69,6 +71,7 @@ public class SpawnHandler
 	public Class c_iceandfire_MyrmexAIForage;
 	public Class c_iceandfire_MyrmexAIFindHidingSpot;
 	public Class c_iceandfire_MyrmexAILeaveHive;
+	public Class c_iceandfire_MyrmexAIMoveThroughHive;
 	public Class c_iceandfire_MyrmexAIReEnterHive;
 	public Class c_iceandfire_MyrmexAIEscortEntity;
 	
@@ -137,6 +140,7 @@ public class SpawnHandler
 				c_iceandfire_MyrmexAIForage = Class.forName("com.github.alexthe666.iceandfire.entity.ai.MyrmexAIForage");
 				c_iceandfire_MyrmexAIFindHidingSpot = Class.forName("com.github.alexthe666.iceandfire.entity.ai.MyrmexAIFindHidingSpot");
 				c_iceandfire_MyrmexAILeaveHive = Class.forName("com.github.alexthe666.iceandfire.entity.ai.MyrmexAILeaveHive");
+				c_iceandfire_MyrmexAIMoveThroughHive = Class.forName("com.github.alexthe666.iceandfire.entity.ai.MyrmexAIMoveThroughHive");
 				c_iceandfire_MyrmexAIReEnterHive = Class.forName("com.github.alexthe666.iceandfire.entity.ai.MyrmexAIReEnterHive");
 				c_iceandfire_MyrmexAIEscortEntity = Class.forName("com.github.alexthe666.iceandfire.entity.ai.MyrmexAIEscortEntity");
 				
@@ -238,11 +242,13 @@ public class SpawnHandler
 		if(!ModConfig.iceandfire.myrmex)
 			return;
 		
-		if(ModConfig.iceandfire.myrmexAlternateNavigation && !path.equals("myrmex_royal"))
+		if(ModConfig.iceandfire.myrmexAlternateNavigation && !path.equals("myrmex_royal") && !path.equals("myrmex_queen"))
 		{
 			AIReducer.debugDebug("Swapping out myrmex navigator");
 			setNavigator(entity, new PathNavigateMyrmexAlternate(entity, entity.getEntityWorld()));
 		}
+		
+		entity.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(ModConfig.iceandfire.myrmexFollowRange);
 		
 		AIReducer.debugDebug("Applying myrmex delay: "+ModConfig.iceandfire.myrmex_ai_delay);
 		applyTickRate(entity.tasks, ModConfig.iceandfire.myrmex_ai_delay);
@@ -253,6 +259,7 @@ public class SpawnHandler
 		wrapTask(entity, entity.tasks, c_iceandfire_MyrmexAIForage, WrappedTaskMyrmexAIForage.class);
 		wrapTask(entity, entity.tasks, c_iceandfire_MyrmexAIFindHidingSpot, WrappedTaskMyrmexAIFindHidingSpot.class);
 		wrapTask(entity, entity.tasks, c_iceandfire_MyrmexAILeaveHive, WrappedTaskMyrmexAILeaveHive.class);
+		wrapTask(entity, entity.tasks, c_iceandfire_MyrmexAIMoveThroughHive, WrappedTaskMyrmexAIMoveThroughHive.class);
 		wrapTask(entity, entity.tasks, c_iceandfire_MyrmexAIReEnterHive, WrappedTaskMyrmexAIReEnterHive.class);
 		AIReducer.debugDebug("Final Tasks Count: "+entity.tasks.taskEntries.size());
 	}

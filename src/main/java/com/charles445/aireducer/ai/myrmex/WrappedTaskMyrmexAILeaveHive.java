@@ -8,12 +8,16 @@ import net.minecraft.entity.ai.EntityAIBase;
 
 public class WrappedTaskMyrmexAILeaveHive extends WrappedTaskMyrmex
 {
-	
 	public WrappedTaskMyrmexAILeaveHive(EntityLiving entity, EntityAIBase task)
 	{
 		super(entity, task);
 	}
 	
+	@Override
+	public void resetTask()
+	{
+		
+	}
 	
 	@Override
 	public boolean shouldExecute()
@@ -62,7 +66,7 @@ public class WrappedTaskMyrmexAILeaveHive extends WrappedTaskMyrmex
 	{
 		//Complete override
 		
-		if(!ModConfig.iceandfire.myrmexModifyLeaveHive || !reflector.c_EntityMyrmexSentinel.isInstance(entity))
+		if(!ModConfig.iceandfire.myrmexModifyLeaveHive)
 			return super.shouldContinueExecuting();
 		
 		//Rearranged a little bit

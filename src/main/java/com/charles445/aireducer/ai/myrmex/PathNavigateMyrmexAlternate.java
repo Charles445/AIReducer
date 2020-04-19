@@ -8,8 +8,10 @@ import javax.annotation.Nullable;
 import com.charles445.aireducer.debug.DebugUtil;
 
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathFinder;
 import net.minecraft.pathfinding.PathNavigateGround;
@@ -27,9 +29,12 @@ public class PathNavigateMyrmexAlternate extends PathNavigateGround
 	
 	//Most noticeable with sentinels at home failing to leave and causing tons of chunk loading and lag
 	
+	private IAttributeInstance searchRange;
+	
 	public PathNavigateMyrmexAlternate(EntityLiving entitylivingIn, World worldIn)
 	{
 		super(entitylivingIn, worldIn);
+		this.searchRange = entitylivingIn.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
 	}
 	
 	//Vanilla but they can swim
@@ -39,6 +44,32 @@ public class PathNavigateMyrmexAlternate extends PathNavigateGround
 		this.nodeProcessor.setCanEnterDoors(true);
 		this.nodeProcessor.setCanSwim(true);
 		return new PathFinder(this.nodeProcessor);
+	}
+	
+	@Override
+	public Path getPathToPos(BlockPos pos)
+	{
+		double distSq = this.entity.getPosition().distanceSq(pos);
+		double baseVal = this.searchRange.getAttributeValue();
+		
+		if(distSq > (baseVal * baseVal))
+			return getStuntedPathToPos(pos);
+		
+		Path path = super.getPathToPos(pos);
+		if(path==null)
+		{
+			//Try again but with a cut down distance.
+			path = getStuntedPathToPos(pos);
+		}
+
+		return path;
+	}
+	
+	public Path getStuntedPathToPos(BlockPos pos)
+	{
+		BlockPos b = pos.subtract(this.entity.getPosition());
+		BlockPos c = this.entity.getPosition().add(b.getX() / 4 ,b.getY() / 4,b.getZ() / 4);
+		return super.getPathToPos(c);
 	}
 	
 	@Override
@@ -64,7 +95,6 @@ public class PathNavigateMyrmexAlternate extends PathNavigateGround
 		//Mostly the same, but the Y maximum distance is bumped from 1.0D to 1.1D
 		//I want them to be able to go up 2 blocks though
 		//TODO that.
-		
 		if (MathHelper.abs((float)(this.entity.posX - (vec3d1.x + 0.5D))) < this.maxDistanceToWaypoint && MathHelper.abs((float)(this.entity.posZ - (vec3d1.z + 0.5D))) < this.maxDistanceToWaypoint && (float)Math.abs(this.entity.posY - vec3d1.y) <= 1.1F)
 		{
 			this.currentPath.setCurrentPathIndex(this.currentPath.getCurrentPathIndex() + 1);

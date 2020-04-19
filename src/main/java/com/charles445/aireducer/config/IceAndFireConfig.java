@@ -22,6 +22,11 @@ public class IceAndFireConfig
 	@Config.RangeInt(min=3,max=40)
 	public int myrmex_ai_delay = 10;
 	
+	@Config.Comment("Range with which Myrmex can see and pathfind - Vanilla 1.7.1 is 128, 1.8.4 is 64")
+	@Config.Name("MyrmexFollowRange")
+	@Config.RangeDouble(min=16.0d, max=128.0d)
+	public double myrmexFollowRange = 50.0d;
+	
 	@Config.Comment("Update chance for EscortEntity - Vanilla is 1.0")
 	@Config.Name("MyrmexUpdateChance EscortEntity")
 	@Config.RangeDouble(min=0.01d, max=1.0d)
@@ -44,6 +49,10 @@ public class IceAndFireConfig
 	@Config.Comment("Modify LeaveHive - for 1.7.1")
 	@Config.Name("MyrmexModify LeaveHive")
 	public boolean myrmexModifyLeaveHive = true;
+	
+	@Config.Comment("Modify MoveThroughHive - for 1.7.1")
+	@Config.Name("MyrmexModify MoveThroughHive")
+	public boolean myrmexMoveThroughHive = true;
 	
 	@Config.Comment("Update chance for ReEnterHive - Vanilla is 1.0")
 	@Config.Name("MyrmexUpdateChance ReEnterHive")
