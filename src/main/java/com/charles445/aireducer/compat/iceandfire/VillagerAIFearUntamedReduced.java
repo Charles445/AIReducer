@@ -28,4 +28,11 @@ public class VillagerAIFearUntamedReduced<T extends Entity> extends AIAvoidReduc
 	{
 		return super.shouldExecute() && (this.closestLivingEntity == null || !(this.closestLivingEntity instanceof EntityTameable) || !((EntityTameable)this.closestLivingEntity).isTamed());
 	}
+	
+	@Override
+	//Later IAF versions remove the need to see the target
+	public boolean mustSee()
+	{
+		return false;
+	}
 }

@@ -28,6 +28,7 @@ public class PathNavigateMyrmexAlternate extends PathNavigateGround
 	//Essentially a port of the newer myrmex navigation in order to mitigate the performance loss from poor pathfinding
 	
 	//Most noticeable with sentinels at home failing to leave and causing tons of chunk loading and lag
+	//They still get stuck a lot
 	
 	private IAttributeInstance searchRange;
 	

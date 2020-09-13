@@ -25,7 +25,7 @@ public class DebugUtil
 		{
 			PathPoint point = path.getPathPointFromIndex(i);
 			//public void spawnParticle(EntityPlayerMP player, EnumParticleTypes particle, boolean longDistance, double x, double y, double z, int count, double xOffset, double yOffset, double zOffset, double speed, int... arguments)
-		    
+			
 			sendParticle(world, EnumParticleTypes.FLAME, (double)point.x, (double)point.y, (double)point.z);
 		}
 	}

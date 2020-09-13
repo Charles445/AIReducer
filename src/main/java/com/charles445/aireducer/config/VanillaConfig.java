@@ -4,6 +4,10 @@ import net.minecraftforge.common.config.Config;
 
 public class VanillaConfig
 {
+	@Config.Comment("Master switch for this handler")
+	@Config.Name("ENABLED")
+	public boolean ENABLED = true;
+	
 	@Config.Comment("Should vanilla rabbit AI be tweaked")
 	@Config.Name("Rabbit")
 	public boolean rabbit = true;

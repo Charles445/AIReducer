@@ -12,17 +12,17 @@ public class AIAvoidReducedRabbit<T extends Entity> extends AIAvoidReduced<T>
 	private final EntityRabbit rabbit;
 	
 	public AIAvoidReducedRabbit(EntityRabbit rabbit, Class<T> classToAvoidIn, float avoidDistanceIn, double farSpeedIn, double nearSpeedIn)
-    {
-        super(rabbit, classToAvoidIn, avoidDistanceIn, farSpeedIn, nearSpeedIn);
-        this.rabbit = rabbit;
-    }
+	{
+		super(rabbit, classToAvoidIn, avoidDistanceIn, farSpeedIn, nearSpeedIn);
+		this.rabbit = rabbit;
+	}
 	
 	public AIAvoidReducedRabbit(EntityRabbit rabbit, Class<T> classToAvoidIn, Predicate <? super T> avoidTargetSelectorIn, float avoidDistanceIn, double farSpeedIn, double nearSpeedIn)
-    {
-        super(rabbit, classToAvoidIn, avoidTargetSelectorIn, avoidDistanceIn, farSpeedIn, nearSpeedIn);
-        this.rabbit = rabbit;
-    }
-    
+	{
+		super(rabbit, classToAvoidIn, avoidTargetSelectorIn, avoidDistanceIn, farSpeedIn, nearSpeedIn);
+		this.rabbit = rabbit;
+	}
+	
 	@Override
 	public boolean shouldExecute()
  	{
@@ -32,7 +32,6 @@ public class AIAvoidReducedRabbit<T extends Entity> extends AIAvoidReduced<T>
 	@Override
 	public int getShouldExecuteDelay()
 	{
-		//Default to instant
 		return ModConfig.vanilla.rabbit_should_avoid;
 	}
 }

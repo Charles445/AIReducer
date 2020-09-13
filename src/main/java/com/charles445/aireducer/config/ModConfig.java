@@ -29,6 +29,11 @@ public class ModConfig
 	@Config.Name("Reducer Enabled")
 	public static boolean enabled = true;
 	
+	//TODO remove
+	@Config.Comment("Toggler for runtime things, does nothing")
+	@Config.Name("Toggler")
+	public static boolean toggler = true;
+	
 	@Mod.EventBusSubscriber(modid = AIReducer.MODID)
 	private static class EventHandler
 	{

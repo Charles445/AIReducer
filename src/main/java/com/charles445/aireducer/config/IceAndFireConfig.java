@@ -4,6 +4,10 @@ import net.minecraftforge.common.config.Config;
 
 public class IceAndFireConfig
 {
+	@Config.Comment("Master switch for this handler")
+	@Config.Name("ENABLED")
+	public boolean ENABLED = true;
+	
 	@Config.Comment("Should death worm AI be tweaked")
 	@Config.Name("Death Worm")
 	public boolean deathworm = true;

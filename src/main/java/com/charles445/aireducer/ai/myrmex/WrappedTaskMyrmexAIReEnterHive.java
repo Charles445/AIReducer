@@ -19,9 +19,9 @@ public class WrappedTaskMyrmexAIReEnterHive extends WrappedTaskMyrmex
 	}
 	
 	@Override
-    public void updateTask()
-    {
-    	if(entity.getRNG().nextDouble() < this.getUpdateChance())
-    		task.updateTask();
-    }
+	public void updateTask()
+	{
+		if(entity.getRNG().nextDouble() < this.getUpdateChance())
+			task.updateTask();
+	}
 }

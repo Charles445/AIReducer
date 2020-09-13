@@ -27,45 +27,45 @@ public abstract class WrappedTask extends EntityAIBase
 	}
 	
 	@Override
-    public boolean shouldContinueExecuting()
-    {
-        return task.shouldContinueExecuting();
-    }
-    
+	public boolean shouldContinueExecuting()
+	{
+		return task.shouldContinueExecuting();
+	}
+	
 	@Override
-    public boolean isInterruptible()
-    {
-        return task.isInterruptible();
-    }
+	public boolean isInterruptible()
+	{
+		return task.isInterruptible();
+	}
 
 	@Override
-    public void startExecuting()
-    {
+	public void startExecuting()
+	{
 		task.startExecuting();
-    }
+	}
 
-    @Override
-    public void resetTask()
-    {
-    	task.resetTask();
-    }
-    
-    @Override
-    public void updateTask()
-    {
-    	task.updateTask();
-    }
+	@Override
+	public void resetTask()
+	{
+		task.resetTask();
+	}
+	
+	@Override
+	public void updateTask()
+	{
+		task.updateTask();
+	}
 
-    @Override
-    public void setMutexBits(int mutexBitsIn)
-    {
-    	this.setMutexBits(mutexBitsIn); //Just in case
-        task.setMutexBits(mutexBitsIn);
-    }
+	@Override
+	public void setMutexBits(int mutexBitsIn)
+	{
+		task.setMutexBits(mutexBitsIn);
+		super.setMutexBits(mutexBitsIn);
+	}
 
-    @Override
-    public int getMutexBits()
-    {
-    	return task.getMutexBits();
-    }
+	@Override
+	public int getMutexBits()
+	{
+		return task.getMutexBits();
+	}
 }
