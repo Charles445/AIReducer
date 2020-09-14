@@ -1,6 +1,8 @@
 package com.charles445.aireducer.process;
 
 import com.charles445.aireducer.config.ModConfig;
+import com.charles445.aireducer.reflect.ReflectorIAF;
+import com.charles445.aireducer.reflect.ReflectorMinecraft;
 import com.charles445.aireducer.routine.IAFDeathWormRoutine;
 import com.charles445.aireducer.routine.IAFMyrmexRoutine;
 import com.charles445.aireducer.routine.Routine;
@@ -15,7 +17,7 @@ public class IAFProcess extends ModProcess
 	@Override
 	public boolean canUse()
 	{
-		return ModConfig.iceandfire.ENABLED;
+		return ModConfig.iceandfire.ENABLED && ReflectorIAF.reflector!=null && ReflectorMinecraft.reflector!=null;
 	}
 	
 	@Override

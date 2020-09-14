@@ -1,5 +1,6 @@
 package com.charles445.aireducer.handler;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,6 +13,7 @@ import com.charles445.aireducer.process.VanillaProcess;
 import com.charles445.aireducer.reflect.ReflectorIAF;
 import com.charles445.aireducer.reflect.ReflectorMinecraft;
 import com.charles445.aireducer.util.ModNames;
+import com.charles445.aireducer.util.ReflectUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -42,7 +44,21 @@ public class SpawnHandler
 		try
 		{
 			if(Loader.isModLoaded(ModNames.ICEANDFIRE))
-				new ReflectorIAF();
+			{
+				Class c_iaf = Class.forName("com.github.alexthe666.iceandfire.IceAndFire");
+				Field f_iaf_VERSION = ReflectUtil.findField(c_iaf, "VERSION");
+				String iaf_version = (String)f_iaf_VERSION.get(null);
+				
+				
+				if(iaf_version.equals("1.7.1"))
+				{
+					new ReflectorIAF();
+				}
+				else
+				{
+					AIReducer.logger.info("Skipping IceAndFire reflector, version is "+iaf_version);
+				}
+			}
 		}
 		catch(Exception e)
 		{
@@ -83,7 +99,8 @@ public class SpawnHandler
 			ModProcess modProcess = modProcessMap.get(domain);
 			if(modProcess!=null)
 			{
-				modProcess.handle(entity, domain, path);
+				if(modProcess.canUse())
+					modProcess.handle(entity, domain, path);
 			}
 		}
 		

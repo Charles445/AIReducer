@@ -1,6 +1,7 @@
 package com.charles445.aireducer.compat.iceandfire;
 
 import com.charles445.aireducer.ai.AIAvoidReduced;
+import com.charles445.aireducer.config.ModConfig;
 import com.google.common.base.Predicate;
 
 import net.minecraft.entity.Entity;
@@ -21,6 +22,13 @@ public class VillagerAIFearUntamedReduced<T extends Entity> extends AIAvoidReduc
 	public VillagerAIFearUntamedReduced(final EntityCreature entityIn, final Class<T> classToAvoidIn, final Predicate<? super T> avoidTargetSelectorIn, final float avoidDistanceIn, final double farSpeedIn, final double nearSpeedIn)
 	{
 		super(entityIn, classToAvoidIn, avoidTargetSelectorIn, avoidDistanceIn, farSpeedIn, nearSpeedIn);
+	}
+	
+	@Override
+	public boolean getRadiusConfig()
+	{
+		//This is only checking for dragons and such, thus the radius is not needed
+		return true;
 	}
 	
 	@Override

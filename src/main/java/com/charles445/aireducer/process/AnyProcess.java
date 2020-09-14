@@ -1,5 +1,6 @@
 package com.charles445.aireducer.process;
 
+import com.charles445.aireducer.reflect.ReflectorMinecraft;
 import com.charles445.aireducer.routine.IAFFearUntamedRoutine;
 import com.charles445.aireducer.routine.Routine;
 
@@ -13,7 +14,7 @@ public class AnyProcess extends ModProcess
 	@Override
 	public boolean canUse()
 	{
-		return true;
+		return ReflectorMinecraft.reflector!=null;
 	}
 	
 	@Override

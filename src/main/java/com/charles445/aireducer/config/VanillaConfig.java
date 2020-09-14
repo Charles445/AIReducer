@@ -8,6 +8,10 @@ public class VanillaConfig
 	@Config.Name("ENABLED")
 	public boolean ENABLED = true;
 	
+	@Config.Comment("Replace vanilla entity avoid tasks for better performance")
+	@Config.Name("Avoid Task Replacement")
+	public boolean avoidTaskReplacement = true;
+	
 	@Config.Comment("Should vanilla rabbit AI be tweaked")
 	@Config.Name("Rabbit")
 	public boolean rabbit = true;
@@ -17,6 +21,7 @@ public class VanillaConfig
 	@Config.RangeInt(min=3,max=20)
 	public int rabbit_ai_delay = 6;
 	
+	//TODO remove, rely on avoidTaskReplacement instead
 	@Config.Comment("Delay for rabbits checking if they are scared - Vanilla is 1")
 	@Config.Name("RabbitAvoidDelay")
 	@Config.RangeInt(min=1,max=10)

@@ -1,6 +1,7 @@
 package com.charles445.aireducer.process;
 
 import com.charles445.aireducer.config.ModConfig;
+import com.charles445.aireducer.reflect.ReflectorMinecraft;
 import com.charles445.aireducer.routine.AvoidRoutine;
 import com.charles445.aireducer.routine.RabbitRoutine;
 import com.charles445.aireducer.routine.Routine;
@@ -15,14 +16,14 @@ public class VanillaProcess extends ModProcess
 	@Override
 	public boolean canUse()
 	{
-		return ModConfig.vanilla.ENABLED;
+		return ModConfig.vanilla.ENABLED && ReflectorMinecraft.reflector!=null;
 	}
 
 	@Override
 	public void handle(EntityLiving entity, String domain, String path)
 	{
 		//TODO would specifying which vanilla mobs to use make this run faster?
-		//TODO consider migrating to AnyProcess...
+		//TODO consider migrating to AnyProcess... that might be bad though
 		avoidRoutine.runRoutine(entity, domain, path);
 		
 		switch(path)

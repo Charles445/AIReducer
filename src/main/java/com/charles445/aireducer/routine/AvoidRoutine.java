@@ -1,6 +1,7 @@
 package com.charles445.aireducer.routine;
 
 import com.charles445.aireducer.ai.AIAvoidReduced;
+import com.charles445.aireducer.config.ModConfig;
 import com.charles445.aireducer.reflect.ReflectorMinecraft;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -13,10 +14,24 @@ import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
 
 public class AvoidRoutine extends Routine
 {
+	//Avoid Routine for VANILLA
+	
 	@Override
 	public boolean canRun()
 	{
-		return ReflectorMinecraft.reflector != null;
+		return ModConfig.vanilla.avoidTaskReplacement && ReflectorMinecraft.reflector != null;
+	}
+	
+	protected EntityAIBase constructAvoid(EntityCreature entity, Class<?> classToAvoid, Predicate<?> avoidTargetSelector, float avoidDistance, double farSpeed, double nearSpeed)
+	{
+		return new AIAvoidReduced(entity, classToAvoid, avoidTargetSelector, avoidDistance, farSpeed, nearSpeed)
+				{
+					@Override
+					public boolean getRadiusConfig()
+					{
+						return ModConfig.vanilla.avoidTaskReplacement;
+					}
+				};
 	}
 
 	@Override
@@ -27,13 +42,7 @@ public class AvoidRoutine extends Routine
 			findAndReplaceAvoids((EntityCreature)entity);
 		}
 	}
-	
-	protected EntityAIBase constructAvoid(EntityCreature entity, Class<?> classToAvoid, Predicate<?> avoidTargetSelector, float avoidDistance, double farSpeed, double nearSpeed)
-	{
-		return new AIAvoidReduced(entity, classToAvoid, avoidTargetSelector, avoidDistance, farSpeed, nearSpeed);
-	}
 
-	
 	private void findAndReplaceAvoids(EntityCreature entityIn)
 	{
 		//Duplicate the avoid task (same settings, just with a different class)
@@ -57,8 +66,5 @@ public class AvoidRoutine extends Routine
 				return null;
 			}
 		});
-		
-		if(count > 0)
-			debugPrintTasks(entityIn.tasks);
 	}
 }

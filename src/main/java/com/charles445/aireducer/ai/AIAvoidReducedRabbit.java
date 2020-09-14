@@ -24,6 +24,14 @@ public class AIAvoidReducedRabbit<T extends Entity> extends AIAvoidReduced<T>
 	}
 	
 	@Override
+	public boolean getRadiusConfig()
+	{
+		//While this isn't the determining factor for whether this task gets run, this is the most relevant setting to it
+		//TODO remove rabbit_should_avoid entirely
+		return ModConfig.vanilla.avoidTaskReplacement;
+	}
+	
+	@Override
 	public boolean shouldExecute()
  	{
 		return this.rabbit.getRabbitType() != 99 && super.shouldExecute();

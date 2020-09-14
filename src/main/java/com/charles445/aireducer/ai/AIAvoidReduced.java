@@ -18,7 +18,9 @@ import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.math.Vec3d;
 
-/**Extending classes should override getExecuteDelay with their corresponding static config value! <br>
+/** EntityAIAvoidEntity replacement
+ * 
+ * Extending classes should override getExecuteDelay with their corresponding static config value! <br>
  * Extending Classes should override getMaxEntityRadius and mustSee
  */
 public class AIAvoidReduced<T extends Entity> extends EntityAIBase
@@ -37,9 +39,15 @@ public class AIAvoidReduced<T extends Entity> extends EntityAIBase
 	private int shouldExecuteDelay = 0;
 	
 	//Override me!
+	public boolean getRadiusConfig()
+	{
+		return true;
+	}
+	
+	//Override me!
 	public double getMaxEntityRadius()
 	{
-		if(ModConfig.toggler)
+		if(this.getRadiusConfig())
 			return 2.0d;
 		
 		return entity.world.MAX_ENTITY_RADIUS;
