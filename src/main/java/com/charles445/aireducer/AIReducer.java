@@ -43,22 +43,29 @@ public class AIReducer
 	{
 		if(ModConfig.debug)
 		{	
-			printRegisteredEntities();
+			printRegisteredEntities(false);
 		}
 		
 		MinecraftForge.EVENT_BUS.register(new SpawnHandler());
 	}
 	
-	private void printRegisteredEntities()
+	private void printRegisteredEntities(boolean dumpAll)
 	{
 		//Debug function
 		for(Map.Entry<ResourceLocation, EntityEntry> entry : ForgeRegistries.ENTITIES.getEntries())
 		{
-			if(EntityLiving.class.isAssignableFrom(entry.getValue().getEntityClass()))
+			if(!dumpAll)
 			{
-				AIReducer.logger.debug(entry.getKey().toString());
+				if(EntityLiving.class.isAssignableFrom(entry.getValue().getEntityClass()))
+				{
+					AIReducer.logger.debug(entry.getKey().toString());
+				}
+				else if(entry.getValue().getEntityClass().isAssignableFrom(EntityLiving.class))
+				{
+					AIReducer.logger.debug(entry.getKey().toString());
+				}
 			}
-			else if(entry.getValue().getEntityClass().isAssignableFrom(EntityLiving.class))
+			else
 			{
 				AIReducer.logger.debug(entry.getKey().toString());
 			}
