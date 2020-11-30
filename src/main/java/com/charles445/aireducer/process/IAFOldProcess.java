@@ -1,25 +1,25 @@
 package com.charles445.aireducer.process;
 
 import com.charles445.aireducer.config.ModConfig;
-import com.charles445.aireducer.reflect.ReflectorIAF;
+import com.charles445.aireducer.reflect.ReflectorIAFOld;
 import com.charles445.aireducer.reflect.ReflectorMinecraft;
-import com.charles445.aireducer.routine.IAFDeathWormRoutine;
-import com.charles445.aireducer.routine.IAFMyrmexRoutine;
+import com.charles445.aireducer.routine.IAFOldDeathWormRoutine;
+import com.charles445.aireducer.routine.IAFOldMyrmexRoutine;
 import com.charles445.aireducer.routine.Routine;
 
 import net.minecraft.entity.EntityLiving;
 
-public class IAFProcess extends ModProcess
+public class IAFOldProcess extends ModProcess
 {
-	Routine deathWormRoutine = new IAFDeathWormRoutine();
-	Routine myrmexRoutine = new IAFMyrmexRoutine();
+	Routine deathWormRoutine = new IAFOldDeathWormRoutine();
+	Routine myrmexRoutine = new IAFOldMyrmexRoutine();
 	
 	@Override
 	public boolean canUse()
 	{
-		return ModConfig.iceandfire.ENABLED && ReflectorIAF.reflector!=null && ReflectorMinecraft.reflector!=null;
+		return ModConfig.iceandfireold.ENABLED && ReflectorIAFOld.reflector!=null && ReflectorMinecraft.reflector!=null;
 	}
-
+	
 	@Override
 	public void handle(EntityLiving entity, String domain, String path)
 	{
@@ -40,5 +40,6 @@ public class IAFProcess extends ModProcess
 			default: break;
 		}
 	}
+	
 
 }

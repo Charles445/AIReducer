@@ -1,4 +1,4 @@
-package com.charles445.aireducer.ai.myrmex;
+package com.charles445.aireducer.ai.myrmexold;
 
 import java.lang.reflect.Field;
 import java.util.Set;
@@ -23,7 +23,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.ChunkCache;
 import net.minecraft.world.World;
 
-public class PathNavigateMyrmexAlternate extends PathNavigateGround
+public class PathNavigateOldMyrmexAlternate extends PathNavigateGround
 {
 	//Essentially a port of the newer myrmex navigation in order to mitigate the performance loss from poor pathfinding
 	
@@ -32,7 +32,7 @@ public class PathNavigateMyrmexAlternate extends PathNavigateGround
 	
 	private IAttributeInstance searchRange;
 	
-	public PathNavigateMyrmexAlternate(EntityLiving entitylivingIn, World worldIn)
+	public PathNavigateOldMyrmexAlternate(EntityLiving entitylivingIn, World worldIn)
 	{
 		super(entitylivingIn, worldIn);
 		this.searchRange = entitylivingIn.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);

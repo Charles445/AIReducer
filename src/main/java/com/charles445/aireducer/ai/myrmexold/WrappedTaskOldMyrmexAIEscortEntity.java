@@ -1,4 +1,4 @@
-package com.charles445.aireducer.ai.myrmex;
+package com.charles445.aireducer.ai.myrmexold;
 
 import com.charles445.aireducer.ai.WrappedTask;
 import com.charles445.aireducer.config.ModConfig;
@@ -6,16 +6,16 @@ import com.charles445.aireducer.config.ModConfig;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
 
-public class WrappedTaskMyrmexAIReEnterHive extends WrappedTaskMyrmex
+public class WrappedTaskOldMyrmexAIEscortEntity extends WrappedTaskOldMyrmex
 {
-	public WrappedTaskMyrmexAIReEnterHive(EntityLiving entity, EntityAIBase task)
+	public WrappedTaskOldMyrmexAIEscortEntity(EntityLiving entity, EntityAIBase task)
 	{
 		super(entity, task);
 	}
-
+	
 	public double getUpdateChance()
 	{
-		return ModConfig.iceandfire.myrmexUpdateChanceReEnterHive;
+		return ModConfig.iceandfireold.myrmexUpdateChanceEscortEntity;
 	}
 	
 	@Override

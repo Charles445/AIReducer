@@ -1,4 +1,4 @@
-package com.charles445.aireducer.compat.iceandfire;
+package com.charles445.aireducer.compat.iceandfireold;
 
 import com.charles445.aireducer.ai.AIAvoidReduced;
 import com.charles445.aireducer.config.ModConfig;

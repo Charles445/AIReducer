@@ -7,10 +7,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.charles445.aireducer.AIReducer;
 import com.charles445.aireducer.config.ModConfig;
 import com.charles445.aireducer.process.AnyProcess;
+import com.charles445.aireducer.process.IAFOldProcess;
 import com.charles445.aireducer.process.IAFProcess;
 import com.charles445.aireducer.process.ModProcess;
 import com.charles445.aireducer.process.VanillaProcess;
 import com.charles445.aireducer.reflect.ReflectorIAF;
+import com.charles445.aireducer.reflect.ReflectorIAFOld;
 import com.charles445.aireducer.reflect.ReflectorMinecraft;
 import com.charles445.aireducer.util.ModNames;
 import com.charles445.aireducer.util.ReflectUtil;
@@ -49,14 +51,14 @@ public class SpawnHandler
 				Field f_iaf_VERSION = ReflectUtil.findField(c_iaf, "VERSION");
 				String iaf_version = (String)f_iaf_VERSION.get(null);
 				
-				
 				if(iaf_version.equals("1.7.1"))
 				{
-					new ReflectorIAF();
+					new ReflectorIAFOld();
 				}
 				else
 				{
-					AIReducer.logger.info("Skipping IceAndFire reflector, version is "+iaf_version);
+					//AIReducer.logger.info("Skipping IceAndFire reflector, version is "+iaf_version);
+					new ReflectorIAF();
 				}
 			}
 		}
@@ -68,9 +70,22 @@ public class SpawnHandler
 		modProcessMap = new ConcurrentHashMap<String, ModProcess>();
 		
 		//ADD PROCESSES HERE
+		
+		//Any
 		anyProcess = new AnyProcess();
+		
+		//Vanilla
 		modProcessMap.put(ModNames.MINECRAFT, new VanillaProcess());
-		modProcessMap.put(ModNames.ICEANDFIRE, new IAFProcess());
+		
+		//Ice and Fire
+		if(Loader.isModLoaded(ModNames.ICEANDFIRE))
+		{
+			//Pick the correct reflector for IAF
+			if(ReflectorIAF.reflector!=null)
+				modProcessMap.put(ModNames.ICEANDFIRE, new IAFProcess());
+			if(ReflectorIAFOld.reflector!=null)
+				modProcessMap.put(ModNames.ICEANDFIRE, new IAFOldProcess());
+		}
 	}
 	
 	@SubscribeEvent

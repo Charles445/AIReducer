@@ -21,50 +21,97 @@ public class IceAndFireConfig
 	@Config.Name("Myrmex")
 	public boolean myrmex = true;
 	
+	@Config.Comment("Range with which Myrmex can see and pathfind - Vanilla is 64")
+	@Config.Name("MyrmexFollowRange")
+	@Config.RangeDouble(min=16.0d, max=128.0d)
+	public double myrmexFollowRange = 64.0d;
+	
 	@Config.Comment("Delay for AI getting a new task - Vanilla is 3")
 	@Config.Name("MyrmexAIDelay")
 	@Config.RangeInt(min=3,max=40)
 	public int myrmex_ai_delay = 10;
 	
-	@Config.Comment("Range with which Myrmex can see and pathfind - Vanilla 1.7.1 is 128, 1.8.4 is 64")
-	@Config.Name("MyrmexFollowRange")
-	@Config.RangeDouble(min=16.0d, max=128.0d)
-	public double myrmexFollowRange = 50.0d;
+	@Config.Comment("Modify EscortEntity")
+	@Config.Name("MyrmexModify EscortEntity")
+	public boolean myrmexModifyEscortEntity = true;
 	
-	@Config.Comment("Update chance for EscortEntity - Vanilla is 1.0")
-	@Config.Name("MyrmexUpdateChance EscortEntity")
+	@Config.Comment("Delay in ticks between new EscortEntity tasks - Vanilla is 0")
+	@Config.Name("MyrmexRunDelay EscortEntity")
+	@Config.RangeInt(min=0)
+	public int myrmexRunDelayEscortEntity = 20;
+	
+	@Config.Comment("Update chance for EscortEntity task updates - Vanilla is 1")
+	@Config.Name("myrmexUpdateChance EscortEntity")
 	@Config.RangeDouble(min=0.01d, max=1.0d)
-	public double myrmexUpdateChanceEscortEntity = 0.1d;
+	public double myrmexUpdateChanceEscortEntity = 1.0d;
 	
-	@Config.Comment("Update chance for FindHidingSpot - Vanilla is 1.0")
-	@Config.Name("MyrmexUpdateChance FindHidingSpot")
+	@Config.Comment("Modify FindHidingSpot")
+	@Config.Name("MyrmexModify FindHidingSpot")
+	public boolean myrmexModifyFindHidingSpot = true;
+	
+	@Config.Comment("Delay in ticks between new FindHidingSpot tasks - Vanilla is 0")
+	@Config.Name("MyrmexRunDelay FindHidingSpot")
+	@Config.RangeInt(min=0)
+	public int myrmexRunDelayFindHidingSpot = 60;
+	
+	@Config.Comment("Update chance for FindHidingSpot task updates - Vanilla is 1")
+	@Config.Name("myrmexUpdateChance FindHidingSpot")
 	@Config.RangeDouble(min=0.01d, max=1.0d)
 	public double myrmexUpdateChanceFindHidingSpot = 0.1d;
 	
-	@Config.Comment("Update chance for Forage - Vanilla is 1.0")
-	@Config.Name("MyrmexUpdateChance Forage")
+	@Config.Comment("Modify Forage")
+	@Config.Name("MyrmexModify Forage")
+	public boolean myrmexModifyForage = true;
+	
+	@Config.Comment("Delay in ticks between new Forage tasks - Vanilla is 0")
+	@Config.Name("MyrmexRunDelay Forage")
+	@Config.RangeInt(min=0)
+	public int myrmexRunDelayForage = 60;
+	
+	@Config.Comment("Update chance for Forage task updates - Vanilla is 1")
+	@Config.Name("myrmexUpdateChance Forage")
 	@Config.RangeDouble(min=0.01d, max=1.0d)
-	public double myrmexUpdateChanceForage = 0.1d;
+	public double myrmexUpdateChanceForage = 0.5d;
 	
-	@Config.Comment("Use alternate path navigation - for 1.7.1")
-	@Config.Name("MyrmexAlternateNavigation")
-	public boolean myrmexAlternateNavigation = true;
-	
-	@Config.Comment("Modify LeaveHive - for 1.7.1")
+	@Config.Comment("Modify LeaveHive")
 	@Config.Name("MyrmexModify LeaveHive")
 	public boolean myrmexModifyLeaveHive = true;
 	
-	@Config.Comment("Modify MoveThroughHive - for 1.7.1")
-	@Config.Name("MyrmexModify MoveThroughHive")
-	public boolean myrmexMoveThroughHive = true;
+	@Config.Comment("Delay in ticks between new LeaveHive tasks - Vanilla is 0")
+	@Config.Name("MyrmexRunDelay LeaveHive")
+	@Config.RangeInt(min=0)
+	public int myrmexRunDelayLeaveHive = 60;
 	
-	@Config.Comment("Update chance for ReEnterHive - Vanilla is 1.0")
-	@Config.Name("MyrmexUpdateChance ReEnterHive")
+	@Config.Comment("Update chance for LeaveHive task updates - Vanilla is 1")
+	@Config.Name("myrmexUpdateChance LeaveHive")
 	@Config.RangeDouble(min=0.01d, max=1.0d)
-	public double myrmexUpdateChanceReEnterHive = 0.1d;
+	public double myrmexUpdateChanceLeaveHive = 0.1d;
 	
-	@Config.Comment("Replaces Ice and Fire dragon avoiding AI to use reduced AI settings instead")
-	@Config.Name("ReplaceVillageAIFearUntamed")
-	public boolean replaceVillageAIFearUntamed = true;
+	@Config.Comment("Modify MoveThroughHive")
+	@Config.Name("MyrmexModify MoveThroughHive")
+	public boolean myrmexModifyMoveThroughHive = true;
 	
+	@Config.Comment("Delay in ticks between new MoveThroughHive tasks - Vanilla is 0")
+	@Config.Name("MyrmexRunDelay MoveThroughHive")
+	@Config.RangeInt(min=0)
+	public int myrmexRunDelayWanderHiveCenter = 60;
+	
+	@Config.Comment("Update chance for MoveThroughHive task updates - Vanilla is 1")
+	@Config.Name("myrmexUpdateChance MoveThroughHive")
+	@Config.RangeDouble(min=0.01d, max=1.0d)
+	public double myrmexUpdateChanceMoveThroughHive = 0.5d;
+	
+	@Config.Comment("Modify WanderHiveCenter")
+	@Config.Name("MyrmexModify WanderHiveCenter")
+	public boolean myrmexModifyWanderHiveCenter = true;
+	
+	@Config.Comment("Delay in ticks between new WanderHiveCenter tasks - Vanilla is 0")
+	@Config.Name("MyrmexRunDelay WanderHiveCenter")
+	@Config.RangeInt(min=0)
+	public int myrmexRunDelayMoveThroughHive = 60;
+	
+	@Config.Comment("Update chance for WanderHiveCenter task updates - Vanilla is 1")
+	@Config.Name("myrmexUpdateChance WanderHiveCenter")
+	@Config.RangeDouble(min=0.01d, max=1.0d)
+	public double myrmexUpdateChanceWanderHiveCenter = 0.7d;
 }

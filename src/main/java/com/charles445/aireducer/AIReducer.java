@@ -31,7 +31,7 @@ public class AIReducer
 {
 	public static final String MODID = "aireducer";
 	public static final String NAME = "AI Reducer";
-	public static final String VERSION = "0.2.0";
+	public static final String VERSION = "0.2.1";
 	
 	@Mod.Instance(AIReducer.MODID)
 	public static AIReducer instance;

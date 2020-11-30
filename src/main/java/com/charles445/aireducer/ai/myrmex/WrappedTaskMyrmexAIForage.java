@@ -1,27 +1,32 @@
 package com.charles445.aireducer.ai.myrmex;
 
-import com.charles445.aireducer.ai.WrappedTask;
 import com.charles445.aireducer.config.ModConfig;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
 
-public class WrappedTaskMyrmexAIForage extends WrappedTaskMyrmex
+public class WrappedTaskMyrmexAIForage extends WrappedTaskMyrmexRunDelay
 {
 	public WrappedTaskMyrmexAIForage(EntityLiving entity, EntityAIBase task)
 	{
 		super(entity, task);
 	}
-	
-	public double getUpdateChance()
+
+	@Override
+	public boolean canModify()
 	{
-		return ModConfig.iceandfire.myrmexUpdateChanceForage;
+		return ModConfig.iceandfire.myrmexModifyForage;
+	}
+
+	@Override
+	public int getRunDelay()
+	{
+		return ModConfig.iceandfire.myrmexRunDelayForage;
 	}
 	
 	@Override
-	public void updateTask()
+	public double getUpdateChance()
 	{
-		if(entity.getRNG().nextDouble() < this.getUpdateChance())
-			task.updateTask();
+		return ModConfig.iceandfire.myrmexUpdateChanceForage;
 	}
 }

@@ -5,9 +5,9 @@ import com.charles445.aireducer.config.ModConfig;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
 
-public class WrappedTaskMyrmexAIFindHidingSpot extends WrappedTaskMyrmexRunDelay
+public class WrappedTaskMyrmexAIWanderHiveCenter extends WrappedTaskMyrmexRunDelay
 {
-	public WrappedTaskMyrmexAIFindHidingSpot(EntityLiving entity, EntityAIBase task)
+	public WrappedTaskMyrmexAIWanderHiveCenter(EntityLiving entity, EntityAIBase task)
 	{
 		super(entity, task);
 	}
@@ -15,18 +15,18 @@ public class WrappedTaskMyrmexAIFindHidingSpot extends WrappedTaskMyrmexRunDelay
 	@Override
 	public boolean canModify()
 	{
-		return ModConfig.iceandfire.myrmexModifyFindHidingSpot;
+		return ModConfig.iceandfire.myrmexModifyWanderHiveCenter;
 	}
 
 	@Override
 	public int getRunDelay()
 	{
-		return ModConfig.iceandfire.myrmexRunDelayFindHidingSpot;
+		return ModConfig.iceandfire.myrmexRunDelayWanderHiveCenter;
 	}
 	
 	@Override
 	public double getUpdateChance()
 	{
-		return ModConfig.iceandfire.myrmexUpdateChanceFindHidingSpot;
+		return ModConfig.iceandfire.myrmexUpdateChanceWanderHiveCenter;
 	}
 }

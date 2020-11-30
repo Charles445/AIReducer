@@ -13,9 +13,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @Config(modid = AIReducer.MODID)
 public class ModConfig
 {
-	@Config.Comment("Ice and Fire AI Options")
+	@Config.Comment("Ice and Fire 1.8+ AI Options")
 	@Config.Name("IceAndFire")
 	public static IceAndFireConfig iceandfire = new IceAndFireConfig();
+	
+	@Config.Comment("Ice and Fire 1.7.1 AI Options")
+	@Config.Name("IceAndFire171")
+	public static IceAndFireOldConfig iceandfireold = new IceAndFireOldConfig();
 	
 	@Config.Comment("Minecraft AI Options")
 	@Config.Name("Minecraft")
