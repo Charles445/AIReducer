@@ -1,74 +1,48 @@
 package com.charles445.aireducer;
 
-import java.util.Map;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.charles445.aireducer.config.ModConfig;
+import com.charles445.aireducer.config.ModConfigManager;
 import com.charles445.aireducer.handler.SpawnHandler;
 
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.registry.EntityEntry;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-@Mod
-(
-	modid = AIReducer.MODID, 
-	name = AIReducer.NAME, 
-	version = AIReducer.VERSION,
-	acceptedMinecraftVersions = "[1.12]",
-	acceptableRemoteVersions = "*"
-	//updateJSON = "https://raw.githubusercontent.com/Charles445/SimpleDifficulty/master/modupdatechecker.json"
-	
-)
+// The value here should match an entry in the META-INF/mods.toml file
+@Mod("aireducer")
 public class AIReducer
 {
 	public static final String MODID = "aireducer";
 	public static final String NAME = "AI Reducer";
-	public static final String VERSION = "0.2.1";
+	public static final String VERSION = "0.1.0"; //Make sure to update mods toml and gradle
 	
-	@Mod.Instance(AIReducer.MODID)
 	public static AIReducer instance;
 	
 	public static Logger logger = LogManager.getLogger("AIReducer");
 	
-	@EventHandler
-	public void postInit(FMLPostInitializationEvent event)
-	{
-		if(ModConfig.debug)
-		{	
-			printRegisteredEntities(false);
-		}
-		
-		MinecraftForge.EVENT_BUS.register(new SpawnHandler());
-	}
-	
-	private void printRegisteredEntities(boolean dumpAll)
-	{
-		//Debug function
-		for(Map.Entry<ResourceLocation, EntityEntry> entry : ForgeRegistries.ENTITIES.getEntries())
-		{
-			if(!dumpAll)
-			{
-				if(EntityLiving.class.isAssignableFrom(entry.getValue().getEntityClass()))
-				{
-					AIReducer.logger.debug(entry.getKey().toString());
-				}
-				else if(entry.getValue().getEntityClass().isAssignableFrom(EntityLiving.class))
-				{
-					AIReducer.logger.debug(entry.getKey().toString());
-				}
-			}
-			else
-			{
-				AIReducer.logger.debug(entry.getKey().toString());
-			}
-		}
-	}
+    public AIReducer()
+    {
+    	if(instance == null)
+    		instance = this;
+    	
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+    }
+
+    private void setup(final FMLCommonSetupEvent event)
+    {
+    	//Config
+		ModLoadingContext mlc = ModLoadingContext.get();
+		mlc.registerConfig(ModConfig.Type.COMMON, ModConfigManager.COMMON_SPEC);
+		ModConfigManager.loadAll();
+		ModConfigManager.updateCommon();
+    	
+		//Handlers
+    	MinecraftForge.EVENT_BUS.register(new SpawnHandler());
+    }
+    
 }

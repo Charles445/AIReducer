@@ -1,0 +1,31 @@
+
+modLoader="javafml"
+# loaderVersion="[36,)"
+loaderVersion="[32,)"
+license="MIT"
+
+[[mods]]
+modId="aireducer"
+version="0.1.0"
+ # A display name for the mod
+displayName="AI Reducer"
+authors="Charles445" #optional
+description='''
+Tweaks some AI to run slower or more optimized
+'''
+
+[[dependencies.aireducer]] #optional
+    modId="forge"
+    mandatory=true
+    # versionRange="[36,)"
+    versionRange="[32,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.aireducer]]
+    modId="minecraft"
+    mandatory=true
+    # versionRange="[1.16.5,1.17)"
+    versionRange="[1.16,1.17)"
+    ordering="NONE"
+    side="BOTH"

@@ -1,243 +1,238 @@
 package com.charles445.aireducer.util;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-import com.charles445.aireducer.AIReducer;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPredicate;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ClassInheritanceMultiMap;
-import net.minecraft.util.EntitySelectors;
+import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.chunk.Chunk;
 
 public class WorldRadiusUtil
 {
-	//All uses of MAX_ENTITY_RADIUS, with a variable size
+	//Utility to provide custom entity radius options
 	
-	public static WorldRadiusUtil instance = new WorldRadiusUtil();
+	//No reflection needed this time around...
 	
-	private Method m_isChunkLoaded;
-	
-	private boolean errorgetEntitiesInAABBexcluding;
-	private boolean errorgetEntitiesInAABB;
-	
-	private boolean working = false;
-	
-	public WorldRadiusUtil()
+	/**getNearestLoadedEntity(Class<? extends T>, EntityPredicate, LivingEntity, double, double, double, AxisAlignedBB)*/
+	@Nullable
+	public static <T extends LivingEntity> T worldGetNearestLoadedEntity(double entityRadius, World world, Class<? extends T> chosenClazz, EntityPredicate targetingPredicate, @Nullable LivingEntity self, double posX, double posY, double posZ, AxisAlignedBB boundingBox)
 	{
-		errorgetEntitiesInAABBexcluding = false;
-		errorgetEntitiesInAABB = false;
-		working = false;
-		
-		try
-		{
-			m_isChunkLoaded = ReflectUtil.findMethodAny(World.class, "func_175680_a", "isChunkLoaded", int.class, int.class, boolean.class);
-			working = true;
-			AIReducer.logger.debug("WorldRadiusUtil initialized");
-		}
-		catch(Exception e)
-		{
-			AIReducer.logger.error("WorldRadiusUtil failed, please consider sending this log to the AIReducer dev!",e);
-		}
+		return world.getNearestEntity(worldGetLoadedEntitiesOfClass(entityRadius, world, chosenClazz, boundingBox, (Predicate<? super T>)null), targetingPredicate, self, posX, posY, posZ);
 	}
 	
-	public List<Entity> getEntitiesWithinAABBExcludingEntity(World world, @Nullable Entity entityIn, AxisAlignedBB bb, double size)
+	/**getEntitiesOfClass(Class<? extends T>, AxisAlignedBB)**/
+	public static <T extends Entity> List<T> worldGetEntitiesOfClass(double entityRadius, World world, Class<? extends T> p_217357_1_, AxisAlignedBB p_217357_2_)
 	{
-		if(!working)
-			return world.getEntitiesWithinAABBExcludingEntity(entityIn, bb);
+		return worldGetEntitiesOfClass(entityRadius, world, p_217357_1_, p_217357_2_, EntityPredicates.NO_SPECTATORS);
+	}
+	
+	/**getLoadedEntitiesOfClass(Class<? extends T>, AxisAlignedBB)**/
+	public static <T extends Entity> List<T> worldGetLoadedEntitiesOfClass(double entityRadius, World world, Class<? extends T> chosenClazz, AxisAlignedBB boundingBox)
+	{
+		return worldGetLoadedEntitiesOfClass(entityRadius, world, chosenClazz, boundingBox, EntityPredicates.NO_SPECTATORS);
+	}
+	
+	/**getEntities(Entity, AxisAlignedBB, List<Entity>, Predicate<? super Entity>)**/
+	public static void chunkGetEntities(double entityRadius, Chunk chunk, @Nullable Entity excludedEntity, AxisAlignedBB boundingBox, List<Entity> returnList, @Nullable Predicate<? super Entity> testPredicate)
+	{
+		//TODO consider getting every time
+		final ClassInheritanceMultiMap<Entity>[] entitySections = chunk.getEntitySections();
 		
+		int i = MathHelper.floor((boundingBox.minY - entityRadius) / 16.0D);
+		int j = MathHelper.floor((boundingBox.maxY + entityRadius) / 16.0D);
+		i = MathHelper.clamp(i, 0, entitySections.length - 1);
+		j = MathHelper.clamp(j, 0, entitySections.length - 1);
 		
-		return getEntitiesInAABBexcluding(world, entityIn, bb, EntitySelectors.NOT_SPECTATING, size);
+		for(int k = i; k <= j; ++k)
+		{
+			ClassInheritanceMultiMap<Entity> classinheritancemultimap = entitySections[k];
+			List<Entity> list = classinheritancemultimap.getAllInstances();
+			int l = list.size();
 			
-	}
-	
-	public List<Entity> getEntitiesInAABBexcluding(World world, @Nullable Entity entity, AxisAlignedBB bb, @Nullable Predicate <? super Entity > predicate, double size)
-	{
-		if(!working)
-			return world.getEntitiesInAABBexcluding(entity, bb, predicate);
-		
-		List<Entity> list = Lists.<Entity>newArrayList();
-		int j2 = MathHelper.floor((bb.minX - size) / 16.0D);
-		int k2 = MathHelper.floor((bb.maxX + size) / 16.0D);
-		int l2 = MathHelper.floor((bb.minZ - size) / 16.0D);
-		int i3 = MathHelper.floor((bb.maxZ + size) / 16.0D);
-
-		for (int j3 = j2; j3 <= k2; ++j3)
-		{
-			for (int k3 = l2; k3 <= i3; ++k3)
+			for(int i1 = 0; i1 < l; ++i1)
 			{
-				try
+				Entity entity = list.get(i1);
+				if (entity.getBoundingBox().intersects(boundingBox) && entity != excludedEntity)
 				{
-					if ((boolean) m_isChunkLoaded.invoke(world, j3, k3, true))
+					if (testPredicate == null || testPredicate.test(entity))
 					{
-						Chunk chunk = world.getChunkFromChunkCoords(j3, k3);
-						getEntitiesWithinAABBForEntity(chunk, entity, bb, list, predicate, size);
+						returnList.add(entity);
 					}
-				}
-				catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-				{
-					if(!errorgetEntitiesInAABBexcluding)
+					
+					if (entity.isMultipartEntity())
 					{
-						errorgetEntitiesInAABBexcluding = true;
-						e.printStackTrace();
-					}
-					return world.getEntitiesInAABBexcluding(entity, bb, predicate);
-				}
-			}
-		}
-
-		return list;
-	}
-	
-	public <T extends Entity> List<T>  getEntitiesWithinAABB(World world, Class <? extends T > classEntity, AxisAlignedBB bb, double size)
-	{
-		if(!working)
-			return world.getEntitiesWithinAABB(classEntity, bb);
-		
-		return getEntitiesWithinAABB(world, classEntity, bb, EntitySelectors.NOT_SPECTATING, size);
-	}
-	
-	public <T extends Entity> List<T> getEntitiesWithinAABB(World world, Class <? extends T > clazz, AxisAlignedBB aabb, @Nullable Predicate <? super T > filter, double size)
-	{
-		if(!working)
-			return world.getEntitiesWithinAABB(clazz, aabb, filter);
-		
-		int j2 = MathHelper.floor((aabb.minX - size) / 16.0D);
-		int k2 = MathHelper.ceil((aabb.maxX + size) / 16.0D);
-		int l2 = MathHelper.floor((aabb.minZ - size) / 16.0D);
-		int i3 = MathHelper.ceil((aabb.maxZ + size) / 16.0D);
-		List<T> list = Lists.<T>newArrayList();
-
-		for (int j3 = j2; j3 < k2; ++j3)
-		{
-			for (int k3 = l2; k3 < i3; ++k3)
-			{
-				try
-				{
-					if ((boolean) m_isChunkLoaded.invoke(world, j3, k3, true))
-					{
-						Chunk chunk = world.getChunkFromChunkCoords(j3, k3);
-						getEntitiesOfTypeWithinAABB(chunk, clazz, aabb, list, filter, size);
-					}
-				}
-				catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-				{
-					if(!errorgetEntitiesInAABB)
-					{
-						errorgetEntitiesInAABB = true;
-						e.printStackTrace();
-					}
-					return world.getEntitiesWithinAABB(clazz, aabb, filter);
-				}
-			}
-		}
-
-		return list;
-	}
-	
-	public <T extends Entity> T findNearestEntityWithinAABB(World world, Class <? extends T > entityType, AxisAlignedBB aabb, T closestTo, double size)
-	{
-		if(!working)
-			return world.findNearestEntityWithinAABB(entityType, aabb, closestTo);
-		
-		List<T> list = this.<T>getEntitiesWithinAABB(world, entityType, aabb, size);
-		T t = null;
-		double d0 = Double.MAX_VALUE;
-
-		for (int j2 = 0; j2 < list.size(); ++j2)
-		{
-			T t1 = list.get(j2);
-
-			if (t1 != closestTo && EntitySelectors.NOT_SPECTATING.apply(t1))
-			{
-				double d1 = closestTo.getDistanceSq(t1);
-
-				if (d1 <= d0)
-				{
-					t = t1;
-					d0 = d1;
-				}
-			}
-		}
-
-		return t;
-	}
-	
-	public <T extends Entity> void getEntitiesOfTypeWithinAABB(Chunk chunk, Class <? extends T > entityClass, AxisAlignedBB aabb, List<T> listToFill, Predicate <? super T > filter, double size)
-	{
-		if(!working)
-		{
-			chunk.getEntitiesOfTypeWithinAABB(entityClass, aabb, listToFill, filter);
-			return;
-		}
-		
-		ClassInheritanceMultiMap<Entity>[] entityLists = chunk.getEntityLists();
-		int i = MathHelper.floor((aabb.minY - size) / 16.0D);
-		int j = MathHelper.floor((aabb.maxY + size) / 16.0D);
-		i = MathHelper.clamp(i, 0, entityLists.length - 1);
-		j = MathHelper.clamp(j, 0, entityLists.length - 1);
-
-		for (int k = i; k <= j; ++k)
-		{
-			for (T t : entityLists[k].getByClass(entityClass))
-			{
-				if (t.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply(t)))
-				{
-					listToFill.add(t);
-				}
-			}
-		}
-	}
-	
-	public void getEntitiesWithinAABBForEntity(Chunk chunk, @Nullable Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate <? super Entity > filter, double size)
-	{
-		if(!working)
-		{
-			chunk.getEntitiesWithinAABBForEntity(entityIn, aabb, listToFill, filter);
-		}
-		
-		ClassInheritanceMultiMap<Entity>[] entityLists = chunk.getEntityLists();
-		int i = MathHelper.floor((aabb.minY - size) / 16.0D);
-		int j = MathHelper.floor((aabb.maxY + size) / 16.0D);
-		i = MathHelper.clamp(i, 0, entityLists.length - 1);
-		j = MathHelper.clamp(j, 0, entityLists.length - 1);
-
-		for (int k = i; k <= j; ++k)
-		{
-			if (!entityLists[k].isEmpty())
-			{
-				for (Entity entity : entityLists[k])
-				{
-					if (entity.getEntityBoundingBox().intersects(aabb) && entity != entityIn)
-					{
-						if (filter == null || filter.apply(entity))
+						for(net.minecraftforge.entity.PartEntity<?> enderdragonpartentity : entity.getParts()) 
 						{
-							listToFill.add(entity);
-						}
-
-						Entity[] aentity = entity.getParts();
-
-						if (aentity != null)
-						{
-							for (Entity entity1 : aentity)
+							if (enderdragonpartentity != excludedEntity && enderdragonpartentity.getBoundingBox().intersects(boundingBox) && (testPredicate == null || testPredicate.test(enderdragonpartentity)))
 							{
-								if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply(entity1)))
-								{
-									listToFill.add(entity1);
-								}
+								returnList.add(enderdragonpartentity);
 							}
 						}
 					}
 				}
 			}
 		}
+	}
+	
+	/**getEntities(Entity, AxisAlignedBB, Predicate<? super Entity>)**/
+	public static List<Entity> getEntities(double entityRadius, World world, @Nullable Entity excludedEntity, AxisAlignedBB boundingBox, @Nullable Predicate<? super Entity> testPredicate)
+	{
+		world.getProfiler().incrementCounter("getEntities");
+		List<Entity> list = Lists.newArrayList();
+		int i = MathHelper.floor((boundingBox.minX - entityRadius) / 16.0D);
+		int j = MathHelper.floor((boundingBox.maxX + entityRadius) / 16.0D);
+		int k = MathHelper.floor((boundingBox.minZ - entityRadius) / 16.0D);
+		int l = MathHelper.floor((boundingBox.maxZ + entityRadius) / 16.0D);
+		AbstractChunkProvider abstractchunkprovider = world.getChunkSource();
+		
+		for(int i1 = i; i1 <= j; ++i1)
+		{
+			for(int j1 = k; j1 <= l; ++j1)
+			{
+				Chunk chunk = abstractchunkprovider.getChunk(i1, j1, false);
+				if (chunk != null)
+				{
+					chunkGetEntities(entityRadius, chunk, excludedEntity, boundingBox, list, testPredicate);
+				}
+			}
+		}
+		
+		return list;
+	}
+	
+	/**getEntities(EntityType<?>, AxisAlignedBB, List<? super T>, Predicate<? super T>)**/
+	@SuppressWarnings("unchecked")
+	public static <T extends Entity> void chunkGetEntities(double entityRadius, Chunk chunk, @Nullable EntityType<?> entityType, AxisAlignedBB boundingBox, List<? super T> returnList, Predicate<? super T> testPredicate)
+	{
+		//TODO consider getting every time
+		final ClassInheritanceMultiMap<Entity>[] entitySections = chunk.getEntitySections();
+		
+		int i = MathHelper.floor((boundingBox.minY - entityRadius) / 16.0D);
+		int j = MathHelper.floor((boundingBox.maxY + entityRadius) / 16.0D);
+		i = MathHelper.clamp(i, 0, entitySections.length - 1);
+		j = MathHelper.clamp(j, 0, entitySections.length - 1);
+		
+		for(int k = i; k <= j; ++k)
+		{
+			for(Entity entity : entitySections[k].find(Entity.class))
+			{
+				if ((entityType == null || entity.getType() == entityType) && entity.getBoundingBox().intersects(boundingBox) && testPredicate.test((T)entity))
+				{
+					returnList.add((T)entity);
+				}
+			}
+		}
+	}
+	
+	/**getEntities(EntityType<T>, AxisAlignedBB, Predicate<? super T>)**/
+	public static <T extends Entity> List<T> worldGetEntities(double entityRadius, World world, @Nullable EntityType<T> entityType, AxisAlignedBB boundingBox, Predicate<? super T> testPredicate)
+	{
+		world.getProfiler().incrementCounter("getEntities");
+		int i = MathHelper.floor((boundingBox.minX - entityRadius) / 16.0D);
+		int j = MathHelper.ceil((boundingBox.maxX + entityRadius) / 16.0D);
+		int k = MathHelper.floor((boundingBox.minZ - entityRadius) / 16.0D);
+		int l = MathHelper.ceil((boundingBox.maxZ + entityRadius) / 16.0D);
+		List<T> list = Lists.newArrayList();
+		
+		for(int i1 = i; i1 < j; ++i1)
+		{
+			for(int j1 = k; j1 < l; ++j1)
+			{
+				Chunk chunk = world.getChunkSource().getChunk(i1, j1, false);
+				if (chunk != null)
+				{
+					chunkGetEntities(entityRadius, chunk, entityType, boundingBox, list, testPredicate);
+				}
+			}
+		}
+		
+		return list;
+	}
+	
+	/** getEntitiesOfClass(Class<? extends T>, AxisAlignedBB, List<T>, Predicate<? super T>) **/
+	public static <T extends Entity> void chunkGetEntitiesOfClass(double entityRadius, Chunk chunk, Class<? extends T> chosenClazz, AxisAlignedBB boundingBox, List<T> returnList, @Nullable Predicate<? super T> testPredicate)
+	{
+		//TODO consider getting every time
+		final ClassInheritanceMultiMap<Entity>[] entitySections = chunk.getEntitySections();
+		
+		int i = MathHelper.floor((boundingBox.minY - entityRadius) / 16.0D);
+		int j = MathHelper.floor((boundingBox.maxY + entityRadius) / 16.0D);
+		i = MathHelper.clamp(i, 0, entitySections.length - 1);
+		j = MathHelper.clamp(j, 0, entitySections.length - 1);
+	
+		for(int k = i; k <= j; ++k)
+		{
+			for(T t : entitySections[k].find(chosenClazz))
+			{
+				if (t.getBoundingBox().intersects(boundingBox) && (testPredicate == null || testPredicate.test(t)))
+				{
+					returnList.add(t);
+				}
+			}
+		}
+	}
+	
+	/** getEntitiesOfClass(Class<? extends T>, AxisAlignedBB, Predicate<? super T>) **/
+	public static <T extends Entity> List<T> worldGetEntitiesOfClass(double entityRadius, World world, Class<? extends T> chosenClazz, AxisAlignedBB boundingBox, @Nullable Predicate<? super T> testPredicate)
+	{
+		world.getProfiler().incrementCounter("getEntities");
+		int i = MathHelper.floor((boundingBox.minX - entityRadius) / 16.0D);
+		int j = MathHelper.ceil((boundingBox.maxX + entityRadius) / 16.0D);
+		int k = MathHelper.floor((boundingBox.minZ - entityRadius) / 16.0D);
+		int l = MathHelper.ceil((boundingBox.maxZ + entityRadius) / 16.0D);
+		List<T> list = Lists.newArrayList();
+		AbstractChunkProvider abstractchunkprovider = world.getChunkSource();
+		
+		for(int i1 = i; i1 < j; ++i1)
+		{
+			for(int j1 = k; j1 < l; ++j1)
+			{
+				Chunk chunk = abstractchunkprovider.getChunk(i1, j1, false);
+				if (chunk != null)
+				{
+					chunkGetEntitiesOfClass(entityRadius, chunk, chosenClazz, boundingBox, list, testPredicate);
+				}
+			}
+		}
+		
+		return list;
+	}
+	
+	/** getLoadedEntitiesOfClass(Class<? extends T>, AxisAlignedBB, Predicate<? super T>) **/
+	public static <T extends Entity> List<T> worldGetLoadedEntitiesOfClass(double entityRadius, World world, Class<? extends T> chosenClazz, AxisAlignedBB boundingBox, @Nullable Predicate<? super T> testPredicate)
+	{
+		world.getProfiler().incrementCounter("getLoadedEntities");
+		int i = MathHelper.floor((boundingBox.minX - entityRadius) / 16.0D);
+		int j = MathHelper.ceil((boundingBox.maxX + entityRadius) / 16.0D);
+		int k = MathHelper.floor((boundingBox.minZ - entityRadius) / 16.0D);
+		int l = MathHelper.ceil((boundingBox.maxZ + entityRadius) / 16.0D);
+		List<T> list = Lists.newArrayList();
+		AbstractChunkProvider abstractchunkprovider = world.getChunkSource();
+		
+		for(int i1 = i; i1 < j; ++i1)
+		{
+			for(int j1 = k; j1 < l; ++j1)
+			{
+				Chunk chunk = abstractchunkprovider.getChunkNow(i1, j1);
+				if (chunk != null)
+				{
+					chunkGetEntitiesOfClass(entityRadius, chunk, chosenClazz, boundingBox, list, testPredicate);
+				}
+			}
+		}
+		
+		return list;
 	}
 }

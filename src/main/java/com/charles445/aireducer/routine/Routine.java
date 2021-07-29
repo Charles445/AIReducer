@@ -2,82 +2,50 @@ package com.charles445.aireducer.routine;
 
 import java.lang.reflect.Constructor;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import com.charles445.aireducer.AIReducer;
-import com.charles445.aireducer.ai.WrappedTask;
 import com.charles445.aireducer.reflect.ReflectorMinecraft;
-import com.charles445.aireducer.util.ErrorUtil;
-import com.google.common.base.Function;
+import com.google.common.collect.Sets;
 
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.EntityAITasks;
-import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
-import net.minecraft.pathfinding.PathNavigate;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.ai.goal.GoalSelector;
+import net.minecraft.entity.ai.goal.PrioritizedGoal;
 
 public abstract class Routine
 {
 	public abstract boolean canRun();
 	
-	public void runRoutine(EntityLiving entity, String domain, String path)
+	public void runRoutine(MobEntity entity, String domain, String path)
 	{
 		if(this.canRun())
 			this.run(entity, domain, path);
 	}
 	
-	protected abstract void run(EntityLiving entity, String domain, String path);
+	protected abstract void run(MobEntity entity, String domain, String path);
 	
-	private Map<Class, Constructor> wrappedConstructorMap = new ConcurrentHashMap<Class, Constructor>();
+	private Map<Class<?>, Constructor<?>> wrappedConstructorMap = new ConcurrentHashMap<Class<?>, Constructor<?>>();
 	
 	
 	//Commonly used routines
 	
-	protected void applyTickRate(EntityAITasks tasks, int tickRate)
-	{
-		if(ReflectorMinecraft.reflector == null)
-			return;
-		
-		try
-		{
-			ReflectorMinecraft.reflector.f_EntityAITasks_tickRate.setInt(tasks, tickRate);
-		}
-		catch (Exception e)
-		{
-			
-		}
-	}
-	
-	protected void setNavigator(EntityLiving entity, PathNavigate navigator)
-	{
-		if(ReflectorMinecraft.reflector == null)
-			return;
-		
-		try
-		{
-			ReflectorMinecraft.reflector.f_EntityLiving_navigator.set(entity, navigator);
-		}
-		catch(Exception e)
-		{
-			
-		}
-	}
-	
-	protected boolean removeAllTasksOfClass(EntityLiving entity, Class classToRemove)
+	protected boolean removeAllTasksOfClass(MobEntity entity, Class<?> classToRemove)
 	{
 		//TODO replace completely
 		
 		boolean found = false;
-		Iterator<EntityAITaskEntry> iterator = entity.tasks.taskEntries.iterator();
+		Set<PrioritizedGoal> availableGoals = ReflectorMinecraft.reflector.getAvailableGoals(entity.goalSelector);
+		Iterator<PrioritizedGoal> iterator = availableGoals.iterator();
 		while(iterator.hasNext())
 		{
-			EntityAITaskEntry task = iterator.next();
+			PrioritizedGoal task = iterator.next();
 			
-			if(task.action.getClass()==classToRemove)
+			if(task.getGoal().getClass()==classToRemove)
 			{
-				ErrorUtil.debugDebug("Removing "+classToRemove.getName()+" from "+entity.getClass().getName());
 				found = true;
 				iterator.remove();
 			}
@@ -85,43 +53,50 @@ public abstract class Routine
 		return found;
 	}
 	
-	protected int tryAndReplaceAllTasks(EntityLiving entity, EntityAITasks tasks, Class toMatch, Function<EntityAITaskEntry,EntityAIBase> action)
+	protected int tryAndReplaceAllTasks(MobEntity entity, GoalSelector goalSelector, Class<?> toMatch, Function<Goal,Goal> action)
 	{
 		int count = 0;
-		LinkedList<EntityAITaskEntry> entries = new LinkedList<>();
-		for(EntityAITaskEntry entry : tasks.taskEntries)
+		Set<PrioritizedGoal> newAvailableGoals = Sets.newLinkedHashSet();
+		
+		Set<PrioritizedGoal> oldAvailableGoals = ReflectorMinecraft.reflector.getAvailableGoals(goalSelector);
+		
+		for(PrioritizedGoal entry : oldAvailableGoals)
 		{
-			//if(toMatch.isInstance(entry.action))
-			if(toMatch == entry.action.getClass())
+			//if(toMatch.isInstance(entry.getGoal()))
+			if(toMatch == entry.getGoal().getClass())
 			{
-				EntityAIBase newAI = action.apply(entry);
+				Goal newAI = action.apply(entry.getGoal());
 				
 				if(newAI!=null)
 				{
-					entries.add(tasks.new EntityAITaskEntry(entry.priority, action.apply(entry)));
+					newAvailableGoals.add(new PrioritizedGoal(entry.getPriority(), newAI));
 					count++;
 				}
 				else
 				{
-					ErrorUtil.debugError("tryAndReplaceAllTasks ERROR "+entity.getClass().getName()+" "+toMatch.getClass().getName());
-					entries.add(entry);
+					AIReducer.logger.warn("tryAndReplaceAllTasks ERROR "+entity.getClass().getName()+" "+toMatch.getClass().getName());
+					newAvailableGoals.add(entry);
 				}
 			}
 			else
 			{
-				entries.add(entry);
+				newAvailableGoals.add(entry);
 			}
 		}
+		
 		if(count>0)
 		{
-			ErrorUtil.debugDebug("Replacing "+count+" tasks of "+toMatch.getName());
-			tasks.taskEntries.clear();
-			tasks.taskEntries.addAll(entries);
+			oldAvailableGoals.clear();
+			oldAvailableGoals.addAll(newAvailableGoals);
+
+			//DEBUG
+			//AIReducer.logger.debug("Replaced "+count+" tasks of "+toMatch.getName()+" for "+entity.getName());
+			//oldAvailableGoals.forEach(pgoal -> AIReducer.logger.debug(""+pgoal.getPriority()+" - "+pgoal.getGoal().toString()));
 		}
 		
 		return count;
 	}
-	
+	/*
 	protected void wrapTask(EntityLiving entity, EntityAITasks tasks, Class clazz, Class<? extends WrappedTask> wrapperClazz)
 	{
 		tryAndReplaceAllTasks(entity, tasks, clazz, (Function<EntityAITaskEntry,EntityAIBase>) oldTaskEntry -> 
@@ -150,11 +125,13 @@ public abstract class Routine
 		});
 	}
 	
-	protected void debugPrintTasks(EntityAITasks tasks)
+	protected void debugPrintTasks(GoalSelector tasks)
 	{
+		MinecraftReflector.
 		for(EntityAITaskEntry entry : tasks.taskEntries)
 		{
 			ErrorUtil.debugDebug("["+entry.priority+", "+entry.action.getClass().getName()+"]");
 		}
 	}
+	*/
 }
