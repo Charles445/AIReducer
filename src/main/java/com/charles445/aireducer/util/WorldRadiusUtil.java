@@ -2,6 +2,7 @@ package com.charles445.aireducer.util;
 
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -15,6 +16,8 @@ import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.chunk.Chunk;
@@ -87,7 +90,7 @@ public class WorldRadiusUtil
 	}
 	
 	/**getEntities(Entity, AxisAlignedBB, Predicate<? super Entity>)**/
-	public static List<Entity> getEntities(double entityRadius, World world, @Nullable Entity excludedEntity, AxisAlignedBB boundingBox, @Nullable Predicate<? super Entity> testPredicate)
+	public static List<Entity> worldGetEntities(double entityRadius, World world, @Nullable Entity excludedEntity, AxisAlignedBB boundingBox, @Nullable Predicate<? super Entity> testPredicate)
 	{
 		world.getProfiler().incrementCounter("getEntities");
 		List<Entity> list = Lists.newArrayList();
@@ -234,5 +237,36 @@ public class WorldRadiusUtil
 		}
 		
 		return list;
+	}
+	
+	/** Stream<VoxelShape> getEntityCollisions(@Nullable Entity, AxisAlignedBB, Predicate<Entity>)**/
+	public static Stream<VoxelShape> worldGetEntityCollisions(double entityRadius, World world, @Nullable Entity excludedEntity, AxisAlignedBB boundingBox, Predicate<Entity> testPredicate)
+	{
+		if (boundingBox.getSize() < 1.0E-7D)
+		{
+			return Stream.empty();
+		} 
+		else
+		{
+			AxisAlignedBB axisalignedbb = boundingBox.inflate(1.0E-7D);
+			return worldGetEntities(entityRadius, world, excludedEntity, axisalignedbb, testPredicate.and((additionalPredicate) -> {
+				if (additionalPredicate.getBoundingBox().intersects(axisalignedbb))
+				{
+					if (excludedEntity == null)
+					{
+						if (additionalPredicate.canBeCollidedWith())
+						{
+							return true;
+						}
+					}
+					else if (excludedEntity.canCollideWith(additionalPredicate))
+					{
+						return true;
+					}
+				}
+
+				return false;
+			})).stream().map(Entity::getBoundingBox).map(VoxelShapes::create);
+		}
 	}
 }
