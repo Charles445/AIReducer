@@ -16,10 +16,12 @@ public class VanillaConfig
 	@Config.Name("Rabbit")
 	public boolean rabbit = true;
 	
+	/*
 	@Config.Comment("Delay for AI getting a new task - Vanilla is 3")
 	@Config.Name("RabbitAIDelay")
 	@Config.RangeInt(min=3,max=20)
 	public int rabbit_ai_delay = 6;
+	*/
 	
 	//TODO remove, rely on avoidTaskReplacement instead
 	@Config.Comment("Delay for rabbits checking if they are scared - Vanilla is 1")

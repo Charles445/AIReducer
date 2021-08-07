@@ -13,6 +13,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @Config(modid = AIReducer.MODID)
 public class ModConfig
 {
+	@Config.Comment("Options that affect all mobs")
+	@Config.Name("Any")
+	public static AnyConfig any = new AnyConfig();
+	
 	@Config.Comment("Ice and Fire 1.8+ AI Options")
 	@Config.Name("IceAndFire")
 	public static IceAndFireConfig iceandfire = new IceAndFireConfig();

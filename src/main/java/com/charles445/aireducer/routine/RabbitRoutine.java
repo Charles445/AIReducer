@@ -26,7 +26,7 @@ public class RabbitRoutine extends Routine
 		{
 			EntityRabbit entityRabbit = (EntityRabbit)entity;
 			
-			applyTickRate(entityRabbit.tasks, ModConfig.vanilla.rabbit_ai_delay);
+			//applyTickRate(entityRabbit.tasks, ModConfig.vanilla.rabbit_ai_delay);
 			
 			//TODO probably broken, should fix later
 			if(removeAllTasksOfClass(entityRabbit, ReflectorMinecraft.reflector.c_rabbit_AIAvoidEntity))

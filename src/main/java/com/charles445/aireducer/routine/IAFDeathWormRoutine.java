@@ -18,9 +18,11 @@ public class IAFDeathWormRoutine extends Routine
 	@Override
 	protected void run(EntityLiving entity, String domain, String path)
 	{
+		/*
 		ErrorUtil.debugDebug("Applying deathworm delay: "+ModConfig.iceandfire.deathworm_ai_delay);
 		applyTickRate(entity.tasks, ModConfig.iceandfire.deathworm_ai_delay);
 		applyTickRate(entity.targetTasks, ModConfig.iceandfire.deathworm_ai_delay);
+		*/
 	}
 
 }

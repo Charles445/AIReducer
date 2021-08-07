@@ -12,19 +12,23 @@ public class IceAndFireOldConfig
 	@Config.Name("Death Worm")
 	public boolean deathworm = true;
 	
+	/*
 	@Config.Comment("Delay for AI getting a new task - Vanilla is 3")
 	@Config.Name("DeathWormAIDelay")
 	@Config.RangeInt(min=3, max=40)
 	public int deathworm_ai_delay = 10;
+	*/
 	
 	@Config.Comment("Should myrmex AI be tweaked")
 	@Config.Name("Myrmex")
 	public boolean myrmex = true;
 	
+	/*
 	@Config.Comment("Delay for AI getting a new task - Vanilla is 3")
 	@Config.Name("MyrmexAIDelay")
 	@Config.RangeInt(min=3,max=40)
 	public int myrmex_ai_delay = 10;
+	*/
 	
 	@Config.Comment("Range with which Myrmex can see and pathfind - Vanilla 1.7.1 is 128, 1.8.4 is 64")
 	@Config.Name("MyrmexFollowRange")
@@ -66,5 +70,14 @@ public class IceAndFireOldConfig
 	@Config.Comment("Replaces Ice and Fire dragon avoiding AI to use reduced AI settings instead")
 	@Config.Name("ReplaceVillageAIFearUntamed")
 	public boolean replaceVillageAIFearUntamed = true;
+	
+	@Config.Comment("How close in blocks a player has to be for myrmex to have AI, helps fix chunk loading issues")
+	@Config.Name("MyrmexProximityRequirement")
+	@Config.RangeDouble(min=10d)
+	public double myrmexProximityRequirement = 1000d;
+	
+	@Config.Comment("Whether to enable Myrmex Proximity Requirements")
+	@Config.Name("MyrmexProximityRequired")
+	public boolean myrmexProximityRequired = true;
 	
 }

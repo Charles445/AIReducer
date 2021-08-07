@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nullable;
+
 import com.charles445.aireducer.AIReducer;
 import com.charles445.aireducer.ai.WrappedTask;
 import com.charles445.aireducer.reflect.ReflectorMinecraft;
@@ -85,14 +87,14 @@ public abstract class Routine
 		return found;
 	}
 	
-	protected int tryAndReplaceAllTasks(EntityLiving entity, EntityAITasks tasks, Class toMatch, Function<EntityAITaskEntry,EntityAIBase> action)
+	protected int tryAndReplaceAllTasks(EntityLiving entity, EntityAITasks tasks, @Nullable Class toMatch, Function<EntityAITaskEntry,EntityAIBase> action)
 	{
 		int count = 0;
 		LinkedList<EntityAITaskEntry> entries = new LinkedList<>();
 		for(EntityAITaskEntry entry : tasks.taskEntries)
 		{
 			//if(toMatch.isInstance(entry.action))
-			if(toMatch == entry.action.getClass())
+			if(toMatch == null || toMatch == entry.action.getClass())
 			{
 				EntityAIBase newAI = action.apply(entry);
 				
@@ -103,7 +105,7 @@ public abstract class Routine
 				}
 				else
 				{
-					ErrorUtil.debugError("tryAndReplaceAllTasks ERROR "+entity.getClass().getName()+" "+toMatch.getClass().getName());
+					ErrorUtil.debugError("tryAndReplaceAllTasks ERROR "+entity.getClass().getName()+" "+(toMatch==null?"any":toMatch.getClass().getName()));
 					entries.add(entry);
 				}
 			}
@@ -114,7 +116,7 @@ public abstract class Routine
 		}
 		if(count>0)
 		{
-			ErrorUtil.debugDebug("Replacing "+count+" tasks of "+toMatch.getName());
+			ErrorUtil.debugDebug("Replacing "+count+" tasks of "+ (toMatch==null?"any":toMatch.getName()));
 			tasks.taskEntries.clear();
 			tasks.taskEntries.addAll(entries);
 		}
@@ -122,7 +124,7 @@ public abstract class Routine
 		return count;
 	}
 	
-	protected void wrapTask(EntityLiving entity, EntityAITasks tasks, Class clazz, Class<? extends WrappedTask> wrapperClazz)
+	protected void wrapTask(EntityLiving entity, EntityAITasks tasks, @Nullable Class clazz, Class<? extends WrappedTask> wrapperClazz)
 	{
 		tryAndReplaceAllTasks(entity, tasks, clazz, (Function<EntityAITaskEntry,EntityAIBase>) oldTaskEntry -> 
 		{

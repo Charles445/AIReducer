@@ -1,5 +1,6 @@
 package com.charles445.aireducer.routine;
 
+import com.charles445.aireducer.ai.myrmex.WrappedProximityTaskMyrmex;
 import com.charles445.aireducer.ai.myrmex.WrappedTaskMyrmexAIEscortEntity;
 import com.charles445.aireducer.ai.myrmex.WrappedTaskMyrmexAIFindHidingSpot;
 import com.charles445.aireducer.ai.myrmex.WrappedTaskMyrmexAIForage;
@@ -28,9 +29,11 @@ public class IAFMyrmexRoutine extends Routine
 		ErrorUtil.debugDebug("Applying myrmex follow range: "+ModConfig.iceandfireold.myrmexFollowRange);
 		entity.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(ModConfig.iceandfireold.myrmexFollowRange);
 		
+		/*
 		ErrorUtil.debugDebug("Applying myrmex delay: "+ModConfig.iceandfire.myrmex_ai_delay);
 		applyTickRate(entity.tasks, ModConfig.iceandfire.myrmex_ai_delay);
 		applyTickRate(entity.targetTasks, ModConfig.iceandfire.myrmex_ai_delay);
+		*/
 		
 		ErrorUtil.debugDebug("Current Tasks Count: "+entity.tasks.taskEntries.size());
 		wrapTask(entity, entity.tasks, ReflectorIAF.reflector.c_iceandfire_MyrmexAIEscortEntity, WrappedTaskMyrmexAIEscortEntity.class);
@@ -39,6 +42,10 @@ public class IAFMyrmexRoutine extends Routine
 		wrapTask(entity, entity.tasks, ReflectorIAF.reflector.c_iceandfire_MyrmexAILeaveHive, WrappedTaskMyrmexAILeaveHive.class);
 		wrapTask(entity, entity.tasks, ReflectorIAF.reflector.c_iceandfire_MyrmexAIMoveThroughHive, WrappedTaskMyrmexAIMoveThroughHive.class);
 		wrapTask(entity, entity.tasks, ReflectorIAF.reflector.c_iceandfire_MyrmexAIWanderHiveCenter, WrappedTaskMyrmexAIWanderHiveCenter.class);
+		
+		wrapTask(entity, entity.tasks, null, WrappedProximityTaskMyrmex.class);
+		wrapTask(entity, entity.targetTasks, null, WrappedProximityTaskMyrmex.class);
+		
 		ErrorUtil.debugDebug("Final Tasks Count: "+entity.tasks.taskEntries.size());
 	}
 

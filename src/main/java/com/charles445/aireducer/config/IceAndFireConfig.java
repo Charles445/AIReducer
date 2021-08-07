@@ -12,10 +12,12 @@ public class IceAndFireConfig
 	@Config.Name("Death Worm")
 	public boolean deathworm = true;
 	
+	/*
 	@Config.Comment("Delay for AI getting a new task - Vanilla is 3")
 	@Config.Name("DeathWormAIDelay")
 	@Config.RangeInt(min=3, max=40)
 	public int deathworm_ai_delay = 10;
+	*/
 	
 	@Config.Comment("Should myrmex AI be tweaked")
 	@Config.Name("Myrmex")
@@ -26,10 +28,12 @@ public class IceAndFireConfig
 	@Config.RangeDouble(min=16.0d, max=128.0d)
 	public double myrmexFollowRange = 64.0d;
 	
+	/*
 	@Config.Comment("Delay for AI getting a new task - Vanilla is 3")
 	@Config.Name("MyrmexAIDelay")
 	@Config.RangeInt(min=3,max=40)
 	public int myrmex_ai_delay = 10;
+	*/
 	
 	@Config.Comment("Modify EscortEntity")
 	@Config.Name("MyrmexModify EscortEntity")
@@ -114,4 +118,13 @@ public class IceAndFireConfig
 	@Config.Name("myrmexUpdateChance WanderHiveCenter")
 	@Config.RangeDouble(min=0.01d, max=1.0d)
 	public double myrmexUpdateChanceWanderHiveCenter = 0.7d;
+
+	@Config.Comment("How close in blocks a player has to be for myrmex to have AI, helps fix chunk loading issues")
+	@Config.Name("MyrmexProximityRequirement")
+	@Config.RangeDouble(min=10d)
+	public double myrmexProximityRequirement = 1000d;
+	
+	@Config.Comment("Whether to enable Myrmex Proximity Requirements")
+	@Config.Name("MyrmexProximityRequired")
+	public boolean myrmexProximityRequired = true;
 }
