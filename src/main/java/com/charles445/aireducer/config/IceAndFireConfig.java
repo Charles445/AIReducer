@@ -11,6 +11,15 @@ public class IceAndFireConfig
 	@Config.Comment("Should death worm AI be tweaked")
 	@Config.Name("Death Worm")
 	public boolean deathworm = true;
+
+	@Config.Comment("How close in blocks a player has to be for death worms to have AI, helps fix chunk loading issues")
+	@Config.Name("DeathWormProximityRequirement")
+	@Config.RangeDouble(min=10d)
+	public double deathwormProximityRequirement = 1000d;
+	
+	@Config.Comment("Whether to enable Death Worm Proximity Requirements")
+	@Config.Name("DeathWormProximityRequired")
+	public boolean deathwormProximityRequired = true;
 	
 	/*
 	@Config.Comment("Delay for AI getting a new task - Vanilla is 3")
